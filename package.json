@@ -1,0 +1,21 @@
+{
+  "name": "lexicon",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "dotenv": "^18.0.0",
+    "ws": "^8.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "^24.13.5",
+    "@types/ws": "^8.18.1",
+    "typescript": "^7.0.2"
+  }
+}
