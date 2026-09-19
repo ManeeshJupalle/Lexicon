@@ -70,21 +70,3 @@ export function gutterForFinal(final: FinalMessage): Gutter {
   if (final.speakerLabel === PENDING) return { kind: "neutral", reason: "pending" };
   return { kind: "speaker", label: final.speakerLabel };
 }
-
-/** Colour per speaker label. The two labels the captures actually produce are pinned by
- *  hand so they are maximally distinct from each other and both clear the contrast floor
- *  against the caption background; anything else falls back to a checked palette. Labels
- *  are not a closed set (NOTES: "A", "B" and "PENDING" observed, more possible above
- *  max_speakers=2), so an unknown label still gets a stable colour rather than an error.
- *
- *  Colour is never the only channel — the gutter shows the label text too. */
-const PINNED_COLORS: Record<string, string> = { A: "#5ad1e6", B: "#ffb454" };
-const FALLBACK_COLORS = ["#8ee07a", "#ff9ec4", "#c3a6ff", "#ffd966"];
-
-export function speakerColor(label: string): string {
-  const pinned = PINNED_COLORS[label];
-  if (pinned !== undefined) return pinned;
-  let hash = 0;
-  for (let i = 0; i < label.length; i++) hash = (hash * 31 + label.charCodeAt(i)) >>> 0;
-  return FALLBACK_COLORS[hash % FALLBACK_COLORS.length]!;
-}

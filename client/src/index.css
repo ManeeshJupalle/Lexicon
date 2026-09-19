@@ -209,7 +209,10 @@ body {
 .line {
   display: flex;
   gap: 18px;
-  margin: 0 0 22px;
+  /* Scales with the caption, like the measure does. A fixed gap that reads as generous
+     at 24px crowds badly at 52px. Not `em`: this element carries the body size, not the
+     caption size. */
+  margin: 0 0 calc(var(--caption-size) * 0.9);
 }
 
 .line-text {
@@ -242,6 +245,7 @@ body {
   width: 3px;
   border-radius: 2px;
   flex: none;
+  background: var(--text-dim);
 }
 
 /* The unresolved gutter. Dim and unlabelled — present enough to keep the text aligned
@@ -251,6 +255,7 @@ body {
 }
 
 .gutter-label {
+  color: var(--text-dim);
   font-size: max(16px, calc(var(--caption-size) * 0.62));
   font-weight: 700;
   line-height: 1.45;

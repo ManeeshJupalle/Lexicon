@@ -125,3 +125,20 @@ Fill these in as they are verified. Claims only go here once measured against th
 - Single audio source only; no multi-room, no remote participants
 - Speaker labels are diarization-based, not identity-based — no named speakers
 - Session state is lost on refresh
+- **Glossary terms are sent, not confirmed applied.** The chips report what the client put on the
+  socket URL at session start. Nothing in the stream acknowledges them: `Begin.configuration` echoes
+  `speaker_labels` and `mode` but not `keyterms_prompt`, and no later frame mentions the terms
+  (NOTES, "Keyword boosting"). A term can be accepted, silently ignored, or mis-decoded and the
+  payload looks identical. The panel says "sent" for that reason.
+- **A turn with two speakers in it renders unlabelled.** The turn-level `speaker_label` can disagree
+  with the words inside the same final (NOTES, "Speaker information"), so the per-word `speaker` is
+  what the gutter reads, and a line whose words disagree gets a neutral gutter rather than a guess.
+  The line is not split into per-speaker runs — the word data would support it, but it turns one
+  caption into a list. Rare in the captures: 1 of 20 finals in the interview runs.
+- **Speaker revisions are never applied to captions already on screen.** AssemblyAI can send a
+  `SpeakerRevision` that rewrites the speaker on turns whose finals were already delivered (NOTES,
+  second addendum). The proxy does not relay it and the client does not apply it. A caption that
+  changes its attribution after it has been read is a correction a reader with no audio cannot check,
+  and the one captured revision was not obviously an improvement — it inverted the majority speaker
+  across 209 words of single-lecturer audio. Consequence to state plainly: a gutter that reads as
+  unresolved stays unresolved for the rest of the session.
