@@ -102,10 +102,15 @@ With labels on:
 - **Consequence:** a partial has no speaker information at all. The live caption line cannot be labelled
   until the final arrives, which with labels on is up to ~10 s later (see next section).
 
-**Retroactive change:** never observed. `speaker_label` is emitted exactly once per turn, on its single
-final, so there is no later frame in which it could be revised. Zero `SpeakerRevision` frames in any run.
-Within a turn, no word ever changed from one label to a different label across frames (the only
-transitions are absent → present, partial → final).
+**Retroactive change — SUPERSEDED 2026-09-19.** A `SpeakerRevision` frame does exist and does rewrite
+speakers on turns whose finals were already delivered. See the second addendum at the end of this file.
+The paragraph below is kept as written rather than deleted: it is an accurate reading of the three
+interview captures and a false generalisation from them.
+
+> **Retroactive change:** never observed. `speaker_label` is emitted exactly once per turn, on its single
+> final, so there is no later frame in which it could be revised. Zero `SpeakerRevision` frames in any run.
+> Within a turn, no word ever changed from one label to a different label across frames (the only
+> transitions are absent → present, partial → final).
 
 **But the turn label is not the whole story.** The turn-level label can disagree with the words inside the
 same final. Run 1, turn 16 final (same in run 3):
@@ -294,8 +299,9 @@ Things the fixtures cannot settle. None should be resolved from memory of the do
   script's HTTP-rejection path never fired either, so the 401/400 response body shape is uncaptured.
 - **What a reconnect looks like.** A new session presumably restarts `turn_order` at 0 and word timings at
   0 ms, which would force the buffer to add a per-session offset. Unobserved.
-- **`SpeakerRevision`.** Documented, never emitted in three minutes with two speakers. Its shape is
-  uncaptured; do not type it from memory.
+- **`SpeakerRevision`.** Partly answered 2026-09-19: captured once, shape recorded in the second
+  addendum. What remains open is whether it can arrive mid-session rather than only at teardown, what
+  makes it fire at all (one run of two emitted it), and whether a session can emit more than one.
 - **Whether labels beyond `A` and `B` appear** with `max_speakers` above 2. Only `A` and `B` were seen, at
   `max_speakers=2`.
 - **`format_turns=false` on this model.** All runs used `true`. Whether unformatted finals exist, and what
@@ -318,3 +324,104 @@ eight keyterms; 180 s of a single lecturer with frequent pauses). Details and co
 - Whole words repeated or omitted at turn boundaries occurred in both runs, in both directions: a word
   present at the end of one final and again as the whole of the next; three words present in one run and
   absent in the other at the same boundary.
+
+## Addendum, 2026-09-19: `SpeakerRevision`, captured once
+
+The frame the open questions listed as uncaptured. **One occurrence in one file**: `strang-boosted.jsonl`
+line 131. Zero in `strang-plain.jsonl`, zero in the three interview captures. Everything below is that one
+frame, and n = 1 should be read into every sentence of it.
+
+It supersedes the "Retroactive change: never observed" claim in the speaker section above. Speaker labels
+are not write-once.
+
+**Where it arrived.** After `Terminate`, before `Termination`. Tail of the run, seconds after the connect
+line (2026-09-19T16:42:21.554Z):
+
+| Line | Event | t |
+| --- | --- | --- |
+| 129 | `audio_done`, 3600 chunks in 180 005 ms | 180.367 |
+| 130 | `sent_terminate` | 180.368 |
+| 131 | `SpeakerRevision`, 25 revisions, 22 089 bytes | 181.047 |
+| 132 | turn 34 final (the open turn, flushed) | 181.048 |
+| 133 | `Termination` | 181.381 |
+| 134 | `close` 1000 `Session Ended` | 181.640 |
+
+It landed 1 ms before the flushed final of turn 34 — and it carries a revision for turn 34, a turn whose
+final had not been sent yet. So a revision is not strictly "about frames already delivered", and arrival
+order is not a safe way to decide what a revision may touch.
+
+**Shape.** Two keys, `type` and `revisions`. Each revision entry has exactly three: `turn_order`,
+`speaker_label`, `words`. No `transcript`, no `utterance`, no `end_of_turn`, no turn-level
+`speaker_confidence`. Entries are ascending by `turn_order`. Words carry the same six keys as a final's
+words — and never a seventh: **0 of 209 revision words carry `speaker_confidence`**, against 180 of the
+180 same-index final words that had it. The revision is less informative per word than what it replaces.
+
+The frame's first entry, complete and verbatim (turn 0's final, line 6, was `speaker_label: "PENDING"`
+with all three words `PENDING`):
+
+```json
+{
+  "received_at": "2026-09-19T16:45:22.601Z",
+  "message": {
+    "type": "SpeakerRevision",
+    "revisions": [
+      {
+        "turn_order": 0,
+        "speaker_label": "B",
+        "words": [
+          { "start": 100, "end": 218,  "text": "to",       "confidence": 0.777587, "speaker": "B", "word_is_final": true },
+          { "start": 437, "end": 891,  "text": "today's",  "confidence": 0.386452, "speaker": "B", "word_is_final": true },
+          { "start": 959, "end": 1245, "text": "lecture.", "confidence": 0.567898, "speaker": "B", "word_is_final": true }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**What it changed.** 25 of the run's 35 finals. The 10 it left alone were all labelled `A` and stayed `A`.
+
+| Turn-level transition | Turns | Which |
+| --- | --- | --- |
+| `PENDING` → `B` | 8 | 0, 5, 7, 10, 12, 13, 29, 31 |
+| `PENDING` → `A` | 4 | 8, 11, 21, 23 |
+| `A` → `B` | 10 | 1, 3, 4, 6, 9, 18, 19, 22, 26, 33 |
+| `A` → `A` | 2 | 24, 25 |
+| `B` → `B` | 1 | 34 |
+
+- **Every `PENDING` resolved.** All 12 `PENDING` finals came back with a concrete label, and all 42
+  word-level `PENDING` words were inside revised turns. Zero `PENDING` remains anywhere in the frame,
+  at turn or word level.
+- **Concrete labels were rewritten too.** 10 turns flipped `A` → `B` outright.
+- **A turn can keep its label and still have its words rewritten.** Turns 24 and 25 are `A` before and
+  `A` after, while 9 of turn 24's 20 words and 1 of turn 25's 23 words changed `A` → `B`. Reading
+  `speaker_label` alone would show those two turns as untouched. 24 of the 25 entries changed at least one
+  word's `speaker`; only turn 34 changed nothing.
+- **The majority label inverted.** The same 209 words, before: `A` 162, `PENDING` 42, `B` 5. After: `B` 153,
+  `A` 56. On audio described as a single lecturer. Whether the revision is more correct than what it
+  replaced is not determinable from this file; it is only different.
+- 6 of the 25 entries have words that are not all their own `speaker_label`, so the disagreement between
+  turn label and word labels recorded in the speaker section survives revision.
+
+**What it did not change.** Word `text`, `start` and `end` are identical to the finals' on all 209 words.
+It is a speaker-only rewrite as far as text and timing go — but `confidence` is *not* preserved: all 209
+differ, 201 lower, median −0.400. Sample, turn 1 word 0: `0.999378` in the final, `0.795833` in the
+revision. Whether the field means the same thing in a revision frame is unknown; it may be carrying
+something closer to the `speaker_confidence` the frame otherwise omits. Do not assume a revision's
+`confidence` is comparable to a final's.
+
+**Non-determinism.** Two runs of the same 180 s of audio, one emitted this frame and one did not. That is
+the whole sample. The two runs are not identical requests — `strang-boosted` sent `keyterms_prompt` and
+`strang-plain` did not — so these files cannot isolate the cause, and a keyterm-triggered revision is not
+excluded, only implausible. What is certain: a session can complete normally, with 12 `PENDING` finals
+still unresolved, and never send one.
+
+**Unsettled: whether revisions arrive mid-session.** The single observation sits at teardown, after
+`Terminate`. Nothing in it shows whether that is where revisions belong or merely where this one landed —
+a flush of pending diarization at session end, or an ordinary mid-session frame that happened to fire
+late. Three minutes of audio may simply be shorter than the interval at which the recogniser reconsiders.
+This matters more than the shape does: a teardown-only revision is a post-session correction, while a
+mid-session revision would rewrite captions a viewer is currently reading. Settling it needs a capture
+long enough to make a mid-session revision likely, and it should not be assumed either way from this one
+frame. Consumers should be written so that a revision arriving at any point is handled, or explicitly
+ignored, as a decision rather than an accident.

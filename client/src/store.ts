@@ -1,0 +1,164 @@
+// zustand store. Holds exactly what BUILD_PROMPTS P2 specifies: the partial line, the
+// finals array, the glossary terms, and the connection status.
+//
+// SPEAKER REVISIONS ARE NOT APPLIED TO `finals`, DELIBERATELY.
+//
+// AssemblyAI can emit a `SpeakerRevision` frame that rewrites the speaker on turns whose
+// finals were already sent (docs/fixtures/NOTES.md, second addendum). Nothing in this file
+// consumes one, and the proxy does not relay it — server/aai/session.ts routes unknown
+// frame types to a log and stops there. That is a choice at both layers, not an oversight,
+// and it is written down in both places so neither gets "fixed" later by accident.
+//
+// Two reasons:
+//
+// 1. The reader. This is a caption surface for someone who cannot hear the room. A line
+//    that silently changes its speaker after they have read it is a correction they can
+//    never verify, and it invalidates what they already understood. An unresolved gutter
+//    is honest about the same uncertainty and costs them nothing. Unresolved beats
+//    retroactively wrong.
+// 2. The evidence. The one captured revision is not obviously an improvement. On audio of
+//    a single lecturer it inverted the majority speaker across 209 words — A 162 / B 5 /
+//    PENDING 42 became B 153 / A 56 — and dropped `speaker_confidence` from every word it
+//    touched. "Later" is not "more correct", and n = 1.
+//
+// If this is ever revisited, the thing to build is a separate review surface after the
+// session ends, not an in-place rewrite of lines on screen.
+
+import { create } from "zustand";
+import type { FinalMessage, PartialMessage, ServerMessage, StatusCode } from "../../server/protocol.ts";
+
+/** Server status codes plus the states the client reaches on its own, before or after any
+ *  socket exists. Kept distinct from StatusCode so the wire contract stays the server's. */
+export type UiStatus = StatusCode | "idle";
+
+/** Legibility floor from BUILD_PROMPTS P2: "text no smaller than 24px". The size control
+ *  cannot go below it — it is the accessibility requirement, not a default. */
+export const FONT_STEPS = [24, 32, 40, 52] as const;
+export const MIN_FONT_PX = FONT_STEPS[0];
+
+/** The proxy splits the keyterms query parameter on commas (server/aai/session.ts,
+ *  normaliseKeyterms) and caps the list at 100. */
+export const MAX_KEYTERMS = 100;
+
+interface LexiconState {
+  status: UiStatus;
+  statusDetail: string;
+  /** Finals the proxy reports holding in its rolling window, from the `live` status. Lets
+   *  a reconnect be seen to have preserved the buffer rather than merely claimed to. */
+  bufferedFinals: number;
+  /** A failure on this side of the socket — mic denied, wrong sample rate. Not a
+   *  StatusCode: those describe the upstream, and conflating them would hide which half
+   *  of the system broke. */
+  localError: string | null;
+
+  /** Append-only for the life of one session. Never mutated in place, never reordered,
+   *  and never rewritten by a later frame — see the note at the top of this file. */
+  finals: FinalMessage[];
+  /** The in-flight line, replaced wholesale on every update. NOTES records partials that
+   *  shrink and retime between frames, so nothing here may be merged or treated as
+   *  append-only. Its own top-level key so that updating it touches no selector that the
+   *  finals list subscribes to. */
+  partial: PartialMessage | null;
+
+  glossary: {
+    /** Raw textarea contents, one term per line. */
+    draft: string;
+    /** Terms sent upstream at the last session start. Upstream accepts keyterms only at
+     *  socket open, so this is frozen for the life of a session by the API, not by us. */
+    applied: string[];
+  };
+
+  fontPx: number;
+  followLive: boolean;
+
+  applyServerMessage: (message: ServerMessage) => void;
+  setStatus: (status: UiStatus, detail: string) => void;
+  setLocalError: (error: string | null) => void;
+  beginSession: (applied: string[]) => void;
+  endSession: () => void;
+  setDraft: (draft: string) => void;
+  setFontPx: (px: number) => void;
+  setFollowLive: (follow: boolean) => void;
+}
+
+export const useStore = create<LexiconState>((set) => ({
+  status: "idle",
+  statusDetail: "",
+  bufferedFinals: 0,
+  localError: null,
+  finals: [],
+  partial: null,
+  glossary: { draft: "", applied: [] },
+  fontPx: MIN_FONT_PX,
+  followLive: true,
+
+  applyServerMessage: (message) =>
+    set((state) => {
+      switch (message.type) {
+        case "status":
+          return {
+            status: message.code,
+            statusDetail: message.detail,
+            bufferedFinals: message.bufferedFinals ?? state.bufferedFinals,
+          };
+        case "partial":
+          return { partial: message };
+        case "final":
+          // The partial belonged to the turn that just finalised, so it is spent. Clearing
+          // it here rather than waiting for the next partial stops the in-flight line
+          // showing a stale duplicate of the final directly above it.
+          return { finals: [...state.finals, message], partial: null };
+      }
+    }),
+
+  setStatus: (status, detail) => set({ status, statusDetail: detail }),
+  setLocalError: (localError) => set({ localError }),
+
+  beginSession: (applied) =>
+    set((state) => ({
+      finals: [],
+      partial: null,
+      bufferedFinals: 0,
+      localError: null,
+      status: "connecting",
+      statusDetail: "opening socket",
+      followLive: true,
+      glossary: { ...state.glossary, applied },
+    })),
+
+  endSession: () => set({ status: "idle", statusDetail: "", partial: null }),
+  setDraft: (draft) => set((state) => ({ glossary: { ...state.glossary, draft } })),
+  setFontPx: (fontPx) => set({ fontPx }),
+  setFollowLive: (followLive) => set({ followLive }),
+}));
+
+/** Textarea text to a term list. Commas split as well as newlines: the proxy's query
+ *  parameter is comma-separated, so a term containing a comma cannot survive the wire
+ *  either way. Splitting on it is lossless and predictable; silently stripping it would
+ *  change the term the user typed. */
+export function parseTerms(draft: string): string[] {
+  const seen = new Set<string>();
+  const terms: string[] = [];
+  for (const raw of draft.split(/[\n,]/)) {
+    const term = raw.trim();
+    if (term === "") continue;
+    const key = term.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    terms.push(term);
+    if (terms.length === MAX_KEYTERMS) break;
+  }
+  return terms;
+}
+
+/** Terms typed but not yet sent upstream. Derived rather than stored: a second array
+ *  would have to be kept in step with the textarea on every keystroke, and this cannot
+ *  drift. Before the first session every term is pending, which is accurate. */
+export function pendingTerms(draft: string, applied: string[]): string[] {
+  const live = new Set(applied.map((t) => t.toLowerCase()));
+  return parseTerms(draft).filter((t) => !live.has(t.toLowerCase()));
+}
+
+export function isSessionActive(status: UiStatus): boolean {
+  return status !== "idle" && status !== "closed" && status !== "upstream_unavailable" && status !== "not_configured";
+}
