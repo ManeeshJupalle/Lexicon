@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Lexicon P1 gate</title>
+    <style>
+      body { font: 15px/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; margin: 2rem; max-width: 46rem; }
+      fieldset { border: 1px solid #ccc; margin: 0 0 1rem; }
+      input { width: 100%; font: inherit; padding: 0.3rem; box-sizing: border-box; }
+      button { font: inherit; padding: 0.4rem 1rem; margin-right: 0.5rem; }
+      dl { display: grid; grid-template-columns: max-content 1fr; gap: 0.2rem 1rem; margin: 0; }
+      dt { color: #666; }
+      dd { margin: 0; }
+      p { color: #666; }
+    </style>
+  </head>
+  <body>
+    <h1>Lexicon P1 gate</h1>
+    <p>Captions go to the browser console. This page is the gate for the backend proxy, not the P2 UI.</p>
+
+    <fieldset>
+      <legend>keyterms</legend>
+      <input id="keyterms" placeholder="eigenvector, eigenvalue, lambda, diagonalize" />
+    </fieldset>
+
+    <p>
+      <button id="start">start mic</button>
+      <button id="stop" disabled>stop</button>
+    </p>
+
+    <dl>
+      <dt>socket</dt><dd id="socket">idle</dd>
+      <dt>upstream</dt><dd id="upstream">-</dd>
+      <dt>finals</dt><dd id="finals">0</dd>
+      <dt>last final</dt><dd id="last">-</dd>
+    </dl>
+
+    <script type="module">
+      const SAMPLE_RATE = 16000;
+      const el = (id) => document.getElementById(id);
+      const set = (id, text) => { el(id).textContent = text; };
+
+      let ws = null;
+      let ctx = null;
+      let stream = null;
+      let finals = 0;
+
+      el("start").addEventListener("click", start);
+      el("stop").addEventListener("click", stop);
+
+      async function start() {
+        el("start").disabled = true;
+        finals = 0;
+        set("finals", "0");
+        set("last", "-");
+
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: { channelCount: 1 } });
+        } catch (error) {
+          set("socket", "mic denied: " + error.message);
+          el("start").disabled = false;
+          return;
+        }
+
+        ctx = new AudioContext({ sampleRate: SAMPLE_RATE });
+        if (ctx.sampleRate !== SAMPLE_RATE) {
+          // Rather than resample here, fail loudly: a silent rate mismatch would look like
+          // a bad recogniser rather than a bad capture.
+          set("socket", "browser gave " + ctx.sampleRate + " Hz, not " + SAMPLE_RATE + " Hz");
+          await stop();
+          return;
+        }
+        await ctx.audioWorklet.addModule("/pcm-worklet.js");
+
+        const terms = el("keyterms").value.trim();
+        const query = terms ? "?keyterms=" + encodeURIComponent(terms) : "";
+        ws = new WebSocket(
+          (location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws" + query,
+        );
+        ws.binaryType = "arraybuffer";
+
+        ws.addEventListener("open", () => {
+          set("socket", "open");
+          el("stop").disabled = false;
+
+          const source = ctx.createMediaStreamSource(stream);
+          const node = new AudioWorkletNode(ctx, "pcm16-writer");
+          node.port.onmessage = (event) => {
+            if (ws && ws.readyState === WebSocket.OPEN) ws.send(event.data);
+          };
+          // A worklet is only pulled when it reaches the destination, so route it there
+          // through a muted gain node.
+          const mute = new GainNode(ctx, { gain: 0 });
+          source.connect(node).connect(mute).connect(ctx.destination);
+        });
+
+        ws.addEventListener("message", (event) => {
+          const message = JSON.parse(event.data);
+          if (message.type === "status") {
+            set("upstream", message.code + " - " + message.detail);
+            console.log("[status]", message.code, message.detail, message);
+            return;
+          }
+          if (message.type === "partial") {
+            console.log("[partial]", message.text);
+            return;
+          }
+          if (message.type === "final") {
+            finals += 1;
+            set("finals", String(finals));
+            set("last", message.text.slice(0, 120));
+            console.log(
+              "[final]",
+              "speaker=" + message.speakerLabel,
+              ms(message.startMs) + "-" + ms(message.endMs),
+              message.text,
+            );
+          }
+        });
+
+        ws.addEventListener("close", (event) => {
+          set("socket", "closed " + event.code + " " + event.reason);
+          el("start").disabled = false;
+          el("stop").disabled = true;
+        });
+
+        ws.addEventListener("error", () => set("socket", "socket error"));
+      }
+
+      async function stop() {
+        if (ws) { ws.close(1000, "client stopped"); ws = null; }
+        if (stream) { stream.getTracks().forEach((track) => track.stop()); stream = null; }
+        if (ctx) { await ctx.close(); ctx = null; }
+        set("socket", "idle");
+        el("start").disabled = false;
+        el("stop").disabled = true;
+      }
+
+      function ms(value) {
+        return (value / 1000).toFixed(2) + "s";
+      }
+    </script>
+  </body>
+</html>
