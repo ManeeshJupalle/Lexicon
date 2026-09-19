@@ -121,7 +121,15 @@ nothing in the scope requires cross-session state.
 Fill these in as they are verified. Claims only go here once measured against the running system.
 
 - Latency: not yet measured
-- Accuracy uplift from glossary boosts: not yet measured
+- **Accuracy uplift from glossary boosts: measured, no uplift observed.** On MIT 18.06 lecture audio
+  (`docs/data/boost-measurement.md`), 38 of 39 technical term occurrences transcribed identically with
+  and without keyterm boosting, and 0 substitutions exist between the runs; the only three differences
+  are `column`/`columns` at turn boundaries, not term spellings. What this shows is that the two runs
+  agree — not that either is right. No reference transcript was used and WER was not computed, so
+  correctness is unverified: `diagonalize` and the singular `eigenvalue` appear in neither run, and
+  whether they were spoken in those 180 s is not determinable from the captures. If they were,
+  boosting did not recover them. Untested on vocabulary outside the model's training distribution:
+  proper nouns, course-local coinages, non-English terms.
 - Single audio source only; no multi-room, no remote participants
 - Speaker labels are diarization-based, not identity-based — no named speakers
 - Session state is lost on refresh
