@@ -94,8 +94,8 @@ Requires `speaker_labels=true`. Run 2 (`false`) has no speaker key anywhere: 0 o
 
 With labels on:
 
-- **Turn level:** `speaker_label` (`"A"` or `"B"`; nothing else appeared with `max_speakers=2`) and
-  `speaker_confidence` (float), **only on finals**. 20 of 20 finals carry them, 0 of 54 partials do.
+- **Turn level:** `speaker_label` (`"A"` or `"B"` in these three captures; the literal string `"PENDING"`
+  appeared in later captures, see the addendum at the end) and `speaker_confidence` (float), **only on finals**. 20 of 20 finals carry them, 0 of 54 partials do.
 - **Word level:** every word in a final has `speaker` (573 of 573 in run 1). Most words also carry
   `speaker_confidence`, but not all: in turn 0, words 0–5 lack it and words 6–39 have it. Treat it as
   optional per word. No partial word carries `speaker` (0 of 680).
@@ -301,3 +301,20 @@ Things the fixtures cannot settle. None should be resolved from memory of the do
 - **`format_turns=false` on this model.** All runs used `true`. Whether unformatted finals exist, and what
   `turn_is_formatted` does then, is uncaptured.
 - **Why `speaker_confidence` is missing on some words** (turn 0, words 0–5) and present on the rest.
+
+## Addendum, 2026-09-19: values first seen in the Strang captures
+
+From `strang-plain.jsonl` and `strang-boosted.jsonl` (same script and parameters as run 1, the second with
+eight keyterms; 180 s of a single lecturer with frequent pauses). Details and counts in
+`docs/data/boost-measurement.md`.
+
+- `speaker_label` and `words[].speaker` can be the literal string `"PENDING"`. 12 of 34 finals in the plain
+  run and 12 of 35 in the boosted run carry it, every one of them 1 to 5 words long; at word level 37 and 42
+  word objects. The statement above that only `A` and `B` appeared holds for the interview captures only.
+- `speaker_label: "B"` appeared once, on a 5-word final, in audio described as a single lecturer.
+- Segmentation followed pauses when the audio had them: 34 and 35 turns in 180 s, shortest final 184 ms, and
+  only 1 and 2 finals at the ~10 s cap.
+- The two runs of the same audio did not produce identical turn boundaries: 32 of 34 start times shared.
+- Whole words repeated or omitted at turn boundaries occurred in both runs, in both directions: a word
+  present at the end of one final and again as the whole of the next; three words present in one run and
+  absent in the other at the same boundary.
