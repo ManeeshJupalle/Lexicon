@@ -1,7 +1,7 @@
 # Lexicon — build prompts
 
-One phase per Claude Code session. Commit at each gate. No phase bleeds forward.
-Claude Code reporting success is not gate evidence — human eyes on output, every time.
+One phase per build session. Commit at each gate. No phase bleeds forward.
+A build tool reporting success is not gate evidence — human eyes on output, every time.
 
 Target schedule at 3–4 h/day:
 
