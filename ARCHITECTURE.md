@@ -121,15 +121,22 @@ nothing in the scope requires cross-session state.
 Fill these in as they are verified. Claims only go here once measured against the running system.
 
 - Latency: not yet measured
-- **Accuracy uplift from glossary boosts: measured, no uplift observed.** On MIT 18.06 lecture audio
-  (`docs/data/boost-measurement.md`), 38 of 39 technical term occurrences transcribed identically with
-  and without keyterm boosting, and 0 substitutions exist between the runs; the only three differences
-  are `column`/`columns` at turn boundaries, not term spellings. What this shows is that the two runs
-  agree — not that either is right. No reference transcript was used and WER was not computed, so
-  correctness is unverified: `diagonalize` and the singular `eigenvalue` appear in neither run, and
-  whether they were spoken in those 180 s is not determinable from the captures. If they were,
-  boosting did not recover them. Untested on vocabulary outside the model's training distribution:
-  proper nouns, course-local coinages, non-English terms.
+- **Accuracy uplift from glossary boosts: measured twice. None on in-distribution technical vocabulary,
+  clear on out-of-distribution proper nouns.** Both measurements are in `docs/data/boost-measurement.md`.
+  Neither used a reference transcript and WER was not computed, so every figure is agreement or
+  disagreement between a plain and a boosted run of the same audio, not correctness. In-distribution: on
+  MIT 18.06 lecture audio with eight linear-algebra terms, 38 of 39 term occurrences transcribed identically
+  with and without boosting, 0 substitutions between the runs, and the only three differences are
+  `column`/`columns` at turn boundaries; `diagonalize` and the singular `eigenvalue` appear in neither run,
+  and whether they were spoken is not determinable from the captures. Out-of-distribution: on 92 s of audio
+  with ten terms (eight surnames, `kappa`, `self-adjoint`), 4 of the 10 terms were rendered only with
+  boosting, at all 8 of their positions: `n-k Dirac` to `Nkemdirim`, `Rabi-Konath` to `Ravindranath`,
+  `Adami-Lindquist` to `Adeyemi-Lindqvist`, `there are now a crucial` to `Thirunavukkarasu`. The other six
+  appear in both runs at the same positions, rendered identically. What the boosted run produced at those
+  8 positions is the exact string supplied in `keyterms_prompt`; whether it is what was spoken is
+  unverified. One further position is flagged in the measurement: the boosted run rendered `Szymanski's`
+  where the plain run rendered `strengths` and the boosted run's own other reading of the same sentence
+  rendered `strength`. Fix or substitution is not determinable without a reference.
 - Single audio source only; no multi-room, no remote participants
 - Speaker labels are diarization-based, not identity-based — no named speakers
 - Session state is lost on refresh

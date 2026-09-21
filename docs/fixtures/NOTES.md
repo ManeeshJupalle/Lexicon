@@ -299,9 +299,12 @@ Things the fixtures cannot settle. None should be resolved from memory of the do
   script's HTTP-rejection path never fired either, so the 401/400 response body shape is uncaptured.
 - **What a reconnect looks like.** A new session presumably restarts `turn_order` at 0 and word timings at
   0 ms, which would force the buffer to add a per-session offset. Unobserved.
-- **`SpeakerRevision`.** Partly answered 2026-09-19: captured once, shape recorded in the second
-  addendum. What remains open is whether it can arrive mid-session rather than only at teardown, what
-  makes it fire at all (one run of two emitted it), and whether a session can emit more than one.
+- **`SpeakerRevision`.** Partly answered 2026-09-19 and 2026-09-21: captured three times, in
+  `strang-boosted.jsonl` (line 131), `jargon-plain.jsonl` and `jargon-boosted.jsonl` (line 53 in each), every
+  time at teardown between `sent_terminate` and `Termination`. Shape recorded in the second addendum, the two
+  later frames in the third. What remains open is whether it can arrive mid-session rather than only at
+  teardown, what makes it fire at all (three of the six runs with `speaker_labels=true` emitted one;
+  `aai-stream`, `aai-stream-boosted` and `strang-plain` did not), and whether a session can emit more than one.
 - **Whether labels beyond `A` and `B` appear** with `max_speakers` above 2. Only `A` and `B` were seen, at
   `max_speakers=2`.
 - **`format_turns=false` on this model.** All runs used `true`. Whether unformatted finals exist, and what
@@ -325,11 +328,17 @@ eight keyterms; 180 s of a single lecturer with frequent pauses). Details and co
   present at the end of one final and again as the whole of the next; three words present in one run and
   absent in the other at the same boundary.
 
-## Addendum, 2026-09-19: `SpeakerRevision`, captured once
+## Addendum, 2026-09-19: `SpeakerRevision`, captured once (count superseded 2026-09-21, third addendum)
 
-The frame the open questions listed as uncaptured. **One occurrence in one file**: `strang-boosted.jsonl`
-line 131. Zero in `strang-plain.jsonl`, zero in the three interview captures. Everything below is that one
-frame, and n = 1 should be read into every sentence of it.
+**Count — SUPERSEDED 2026-09-21.** The frame has since arrived in two more captures, `jargon-plain.jsonl`
+and `jargon-boosted.jsonl`, line 53 in each: three occurrences in three of the seven fixture files. See the
+third addendum at the end of this file. The paragraph below is kept as written rather than deleted: it was
+accurate for the five files that existed on 2026-09-19, and the rest of this addendum still describes the
+Strang frame alone.
+
+> The frame the open questions listed as uncaptured. **One occurrence in one file**: `strang-boosted.jsonl`
+> line 131. Zero in `strang-plain.jsonl`, zero in the three interview captures. Everything below is that one
+> frame, and n = 1 should be read into every sentence of it.
 
 It supersedes the "Retroactive change: never observed" claim in the speaker section above. Speaker labels
 are not write-once.
@@ -410,11 +419,17 @@ revision. Whether the field means the same thing in a revision frame is unknown;
 something closer to the `speaker_confidence` the frame otherwise omits. Do not assume a revision's
 `confidence` is comparable to a final's.
 
-**Non-determinism.** Two runs of the same 180 s of audio, one emitted this frame and one did not. That is
-the whole sample. The two runs are not identical requests — `strang-boosted` sent `keyterms_prompt` and
-`strang-plain` did not — so these files cannot isolate the cause, and a keyterm-triggered revision is not
-excluded, only implausible. What is certain: a session can complete normally, with 12 `PENDING` finals
-still unresolved, and never send one.
+**Non-determinism — sample SUPERSEDED 2026-09-21.** The sample is now six runs with `speaker_labels=true`:
+three emitted the frame (`strang-boosted`, `jargon-plain`, `jargon-boosted`) and three did not (`aai-stream`,
+`aai-stream-boosted`, `strang-plain`). `jargon-plain` sent no `keyterms_prompt` and emitted it, so keyterms
+are not required for the frame to fire. What triggers it is still not isolated by these files. The last
+sentence of the paragraph below stands.
+
+> **Non-determinism.** Two runs of the same 180 s of audio, one emitted this frame and one did not. That is
+> the whole sample. The two runs are not identical requests — `strang-boosted` sent `keyterms_prompt` and
+> `strang-plain` did not — so these files cannot isolate the cause, and a keyterm-triggered revision is not
+> excluded, only implausible. What is certain: a session can complete normally, with 12 `PENDING` finals
+> still unresolved, and never send one.
 
 **Unsettled: whether revisions arrive mid-session.** The single observation sits at teardown, after
 `Terminate`. Nothing in it shows whether that is where revisions belong or merely where this one landed —
@@ -425,3 +440,64 @@ mid-session revision would rewrite captions a viewer is currently reading. Settl
 long enough to make a mid-session revision likely, and it should not be assumed either way from this one
 frame. Consumers should be written so that a revision arriving at any point is handled, or explicitly
 ignored, as a decision rather than an accident.
+
+## Addendum, 2026-09-21: `SpeakerRevision`, two more captures
+
+Two further occurrences, one in each of the jargon captures (`audio/jargon.wav`, 92 s; one plain run and one
+with ten `keyterms_prompt` terms, see the second measurement in `docs/data/boost-measurement.md`). This
+corrects the second addendum's count of one. Everything below is from `jargon-plain.jsonl` and
+`jargon-boosted.jsonl`.
+
+**Where it arrived.** Line 53 in both files, after `sent_terminate` and before `Termination`, as in the
+Strang capture. Seconds after each file's connect line:
+
+| Line | Event | plain t | boosted t |
+| --- | --- | --- | --- |
+| 50 | turn 9 final, the last turn | 91.527 | 92.206 |
+| 51 | `audio_done`, 1841 chunks in 92 057 / 92 056 ms | 92.325 | 92.975 |
+| 52 | `sent_terminate` | 92.326 | 92.976 |
+| 53 | `SpeakerRevision`, 5 revisions, 10 039 / 9 761 bytes | 92.392 | 93.169 |
+| 54 | `Termination`, audio 92 s | 92.741 | 93.485 |
+| 55 | `close` 1000 `Session Ended` | 93.590 | 93.976 |
+
+Unlike the Strang frame, neither carries a revision for a turn whose final had not yet been sent: all ten
+finals preceded `audio_done` in both runs, and no turn was open at teardown.
+
+**Shape.** As the Strang frame: two keys, `type` and `revisions`; three keys per entry, `turn_order`,
+`speaker_label`, `words`; entries ascending by `turn_order`; word entries carry the six keys of a final's
+words and never `speaker_confidence` (0 of 98 words in plain, 0 of 95 in boosted, against 85 of 98 and 82 of
+95 of the same-index final words that had it). Word `text`, `start` and `end` are identical to the finals'
+on all 98 and all 95 words. `confidence` differs on every word: lower on 97 of 98 (median −0.651) and on 95
+of 95 (median −0.697). Turn 0 word 0, `Today`: `0.839796` in the plain final and `0.877317` in the boosted
+final, `0.010797` in both revisions.
+
+**What it changed.** Five of the ten finals in each run, the same five: turns 0, 2, 4, 6 and 9. The other
+five (1, 3, 5, 7, 8) were `A` and stayed `A`.
+
+| Turn | Turn label, final → revision | Word speakers, final → revision (plain) | (boosted) |
+| --- | --- | --- | --- |
+| 0 | `A` → `B` | `A` 19 → `B` 13, `A` 6 | same |
+| 2 | `A` → `A` | `A` 21, `PENDING` 3 → `A` 12, `B` 12 | `A` 21, `PENDING` 3 → `A` 13, `B` 11 |
+| 4 | `A` → `A` | `A` 15, `PENDING` 1 → `A` 16 | `A` 12, `PENDING` 1 → `A` 13 |
+| 6 | `A` → `A` | `A` 25 → `A` 13, `B` 12 | `A` 25 → `A` 14, `B` 11 |
+| 9 | `A` → `A` | `A` 11, `PENDING` 3 → `A` 14 | same |
+
+- **Every `PENDING` resolved**, as in Strang: all 7 word-level `PENDING` in each run sat inside revised
+  turns and none remains in the frame. No final in either run was `PENDING` at turn level.
+- **Turn 0 relabelled `A` → `B`** in both runs, with 13 of its 19 words moved to `B`. Its turn-level
+  `speaker_confidence` on the final was 0.204 in both runs.
+- **Turns 2 and 6 keep `A` and have about half their words rewritten to `B`**, the pattern the second
+  addendum recorded for Strang turns 24 and 25. Turns 4 and 9 keep `A` and change only their `PENDING`
+  words.
+- **The majority label did not invert.** Over all final words, before: `A` 163, `PENDING` 7 (plain) and
+  `A` 160, `PENDING` 7 (boosted). After applying the revision: `A` 133, `B` 37 and `A` 132, `B` 35. The
+  Strang inversion is one observation of three, not the rule.
+
+**Same audio, two frames.** The two frames revise the same five turns with the same turn-level transitions.
+They are not byte-identical: the entry for turn 9, whose final is identical in both runs, is identical; the
+entries for turns 0, 2, 4 and 6, whose finals differ between the runs, differ.
+
+**What is still open.** Whether it can arrive mid-session: three observations, all at teardown between
+`sent_terminate` and `Termination`; the "Unsettled" paragraph of the second addendum applies with n = 3 in
+place of n = 1. What makes it fire: three of the six runs with `speaker_labels=true` emitted one, and the
+files do not isolate a cause. Whether a session can emit more than one: never more than one seen.
