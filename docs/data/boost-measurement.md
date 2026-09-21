@@ -248,3 +248,208 @@ tokenisation and alignment give, for each run, WER = (substitutions + deletions 
 tokens over the 180 s window, plus per-term recall (reference occurrences of each term against rendered
 occurrences), which would also settle the "neither got" and "which side of each boundary event is right"
 questions above.
+
+---
+
+# Keyterm boost measurement 2 — out-of-distribution terms, `audio/jargon.wav`, 92 s
+
+A separate measurement from the one above, on different audio with a different term list. Two captures of the
+same audio, identical parameters except `keyterms_prompt` on the second. Every number below comes from the two
+fixture files named here. No reference transcript was used. Throughout, "rendered the term" means the final
+contains the exact string supplied in `keyterms_prompt`; it does not mean the string is what was said.
+
+## Setup
+
+| | plain | boosted |
+| --- | --- | --- |
+| Fixture | `docs/fixtures/jargon-plain.jsonl` | `docs/fixtures/jargon-boosted.jsonl` |
+| Connect (UTC) | 2026-09-21T15:36:18.362Z | 2026-09-21T15:46:50.195Z |
+| Session id | `54d202b1-16ea-49e2-8c5a-d3315f237b57` | `e0702609-a6ff-4bc8-8eb1-2c22dbaec83e` |
+| Model (`Begin.configuration.model`) | `universal-3-5-pro`, mode `balanced`, api_version `2025-05-12` | same |
+| Query parameters | `speech_model=universal-3-5-pro&sample_rate=16000&encoding=pcm_s16le&format_turns=true&speaker_labels=true&max_speakers=2` | same, plus `keyterms_prompt` |
+| Lines / server frames | 55 / 50 | 55 / 50 |
+| Frame types | 1 Begin, 10 SpeechStarted, 37 Turn, 1 SpeakerRevision, 1 Termination | same |
+| Turn frames (partials + finals) | 37 (27 + 10) | 37 (27 + 10) |
+| Tokens in finals | 170 | 167 |
+| `Termination` | audio 92 s, session 92 s | audio 92 s, session 93 s |
+| Close | 1000 `Session Ended` | 1000 `Session Ended` |
+
+Audio: `audio/jargon.wav`, 2 944 342 bytes of 16 kHz mono PCM16 (92.0 s), sent as 1841 chunks of 50 ms. Last
+word end in both runs: 90 121 ms. The ten `SpeechStarted` timestamps are identical in the two runs (256, 10 272,
+13 184, 23 200, 33 216, 43 232, 53 248, 63 264, 73 280, 83 296 ms), and so are the ten final turn start times.
+One final per `turn_order` in each run. All ten finals carry `speaker_label` `A` in both runs.
+
+Keyterms as given, from the `keyterms` array on the connect line: `Venkataraman, Bhattacharya, Okonkwo,
+Nkemdirim, Ravindranath, Szymanski, Adeyemi-Lindqvist, Thirunavukkarasu, kappa, self-adjoint`.
+
+The boosted request, verbatim from `jargon-boosted.jsonl` line 1:
+
+```
+wss://streaming.assemblyai.com/v3/ws?speech_model=universal-3-5-pro&sample_rate=16000&encoding=pcm_s16le&format_turns=true&speaker_labels=true&max_speakers=2&keyterms_prompt=%5B%22Venkataraman%22%2C%22Bhattacharya%22%2C%22Okonkwo%22%2C%22Nkemdirim%22%2C%22Ravindranath%22%2C%22Szymanski%22%2C%22Adeyemi-Lindqvist%22%2C%22Thirunavukkarasu%22%2C%22kappa%22%2C%22self-adjoint%22%5D
+```
+
+No term contains a space, so no `+` appears in the query string. The two hyphens went over the wire as literal `-`.
+
+The finals contain the same passage twice. Turns 0–4 (00:00.320 to 00:43) and turns 5–9 (00:43.232 to
+01:30) have near-identical text in both runs, so each term has up to two positions, called the first and
+second reading below. The two readings differ in a few words in both runs (`location in the` /
+`notation in the course reader`, `A problem set 4` / `For problem set 4`, `criterion for fails for` / `criterion falls for`).
+
+## Method
+
+As in the first measurement (finals only, `words[].text` lowercased and stripped to `a–z`, `0–9`, apostrophe;
+token-level Levenshtein alignment), with two additions:
+
+- Hyphens are removed by the normalisation, so `self-adjoint` is the token `selfadjoint` and
+  `Adeyemi-Lindqvist` is `adeyemilindqvist`. A hyphenated term would also have been matched as its parts in
+  consecutive tokens (`self adjoint`); no such split rendering occurred in either run.
+- Possessives are counted as inflected and named: `Bhattacharya's`, `Okonkwo's`, `Szymanski's`. The bare
+  surname never occurs for `Bhattacharya` or `Okonkwo` in either run.
+
+## Alignment of the two runs
+
+| | count |
+| --- | --- |
+| Tokens, plain | 170 |
+| Tokens, boosted | 167 |
+| Equal | 149 |
+| Substitutions | 16 |
+| Insertions (boosted only) | 2 |
+| Deletions (plain only) | 5 |
+| Edit distance | 23 |
+| Difference hunks | 15 |
+
+Nine of the fifteen hunks contain a keyterm on the boosted side. Six contain no keyterm on either side. All
+fifteen are listed further down. Turn boundaries are identical in the two runs; every hunk lies inside one
+turn, with the same `turn_order` on both sides.
+
+## Per-term counts
+
+| Term | Plain exact | Plain inflected | Boosted exact | Boosted inflected | Aligned spans | SAME | Boosted only | Plain only |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Venkataraman | 2 | 0 | 2 | 0 | 2 | 2 | 0 | 0 |
+| Bhattacharya | 0 | 2 `Bhattacharya's` | 0 | 2 `Bhattacharya's` | 2 | 2 | 0 | 0 |
+| Okonkwo | 0 | 2 `Okonkwo's` | 0 | 2 `Okonkwo's` | 2 | 2 | 0 | 0 |
+| Nkemdirim | 0 | 0 | 2 | 0 | 2 | 0 | 2 | 0 |
+| Ravindranath | 0 | 0 | 2 | 0 | 2 | 0 | 2 | 0 |
+| Szymanski | 2 | 0 | 2 | 1 `Szymanski's` | 3 | 2 | 1 | 0 |
+| Adeyemi-Lindqvist | 0 | 0 | 2 | 0 | 2 | 0 | 2 | 0 |
+| Thirunavukkarasu | 0 | 0 (`Tirunavukkarasu` 1, one letter off, not counted) | 2 | 0 | 2 | 0 | 2 | 0 |
+| kappa | 2 | 0 | 2 | 0 | 2 | 2 | 0 | 0 |
+| self-adjoint | 2 | 0 | 2 | 0 | 2 | 2 | 0 | 0 |
+| **Total** | 8 | 4 | 16 | 5 | 21 | 12 | 9 | 0 |
+
+Plain-only tokens (in the plain multiset and not the boosted one): `course`, `strengths` ×2, `we'll` ×2, `nk` ×2,
+`dirac`, `rabikonath` ×2, `a`, `weystrass` ×2, `adamilindquist` ×2, `there`, `are`, `now`, `crucial`, `dream`,
+`tirunavukkarasu`. Boosted-only tokens: `we` ×2, `will` ×2, `globe`, `strength`, `nkemdirim` ×2, `ravindranath` ×2,
+`wistress` ×2, `adeyemilindqvist` ×2, `thirunavukkarasu` ×2, `creates`, `szymanski's`.
+
+## Every term, side by side
+
+Rendering is the word text as it appears in the final, punctuation included. Time is the `start` of the first
+word of the span; where the two sides of a hunk start at different times, both are given, plain first.
+
+| Term | Reading | Time | Plain | Boosted | Status |
+| --- | --- | --- | --- | --- | --- |
+| Venkataraman | 1 | 00:03.438 | Venkataraman | Venkataraman | SAME |
+| | 2 | 00:43.975 | Venkataraman | Venkataraman | SAME |
+| Bhattacharya | 1 | 00:06.265 | Bhattacharya's | Bhattacharya's | SAME, possessive in both |
+| | 2 | 00:45.929 | Bhattacharya's | Bhattacharya's | SAME, possessive in both |
+| Okonkwo | 1 | 00:08.446 | Okonkwo's | Okonkwo's | SAME, possessive in both |
+| | 2 | 00:48.595 | Okonkwo's | Okonkwo's | SAME, possessive in both |
+| Nkemdirim | 1 | 00:17.255 | n-k Dirac | Nkemdirim | boosted only; plain has two tokens |
+| | 2 | 00:56.995 | n-k dream | Nkemdirim | boosted only; plain has two tokens |
+| Ravindranath | 1 | 00:19.839 | Rabi-Konath | Ravindranath | boosted only |
+| | 2 | 00:59.192 | Rabi-Konath | Ravindranath | boosted only |
+| Szymanski | 1 | 00:25.590 | Szymanski | Szymanski | SAME |
+| | 2 | 01:04.588 | Szymanski | Szymanski | SAME |
+| | extra, 2 | 00:51.971 / 00:52.149 | strengths. | Szymanski's. | boosted only; see "Regressions" |
+| Adeyemi-Lindqvist | 1 | 00:30.485 | Adami-Lindquist | Adeyemi-Lindqvist | boosted only |
+| | 2 | 01:11.050 | Adami-Lindquist | Adeyemi-Lindqvist | boosted only |
+| Thirunavukkarasu | 1 | 00:34.459 / 00:34.944 | there are now a crucial, | Thirunavukkarasu creates, | boosted only; five-token hunk |
+| | 2 | 01:16.947 | Tirunavukkarasu | Thirunavukkarasu | boosted only; plain differs by one letter |
+| kappa | 1 | 00:15.881 | kappa. | kappa. | SAME |
+| | 2 | 00:55.703 | kappa. | kappa. | SAME |
+| self-adjoint | 1 | 00:21.390 | self-adjoint. | self-adjoint. | SAME |
+| | 2 | 01:00.469 | self-adjoint. | self-adjoint. | SAME |
+
+Word-level `confidence` on the term-bearing words in the finals: plain, 12 words, 0.911 to 0.999; boosted, 21
+words, 0.983 to 1.000 except `Szymanski's.` at 00:52.149, which is 0.834.
+
+## The fifteen differences in full
+
+Turn numbers are the same on both sides of every hunk.
+
+**Term-bearing, first reading**
+
+1. 00:17.255, turn 2: plain `The n-k Dirac condition holds`, boosted `The Nkemdirim condition holds`.
+2. 00:19.839, turn 2: plain `the Rabi-Konath operator is self-adjoint.`, boosted `the Ravindranath operator is self-adjoint.`
+3. 00:30.485, turn 3: plain `the Adami-Lindquist bound from last week.`, boosted `the Adeyemi-Lindqvist bound from last week.`
+4. 00:34.459, turn 4: plain `And note that there are now a crucial, uh, criterion for fails for non-compact operators. So` (16 words),
+   boosted `And note that Thirunavukkarasu creates, uh, criterion for fails for non-compact operators. So` (13 words).
+   Plain tokens `there are now a crucial` (5) against boosted `Thirunavukkarasu creates` (2); the only hunk that changes a turn's word count.
+
+**Term-bearing, second reading**
+
+5. 00:51.971, turn 5: plain `differs from strengths.`, boosted `differs from Szymanski's.` The first reading of the same
+   sentence (turn 1, 00:11.630) is `differs from strengths.` in plain and `differs from strength.` in boosted.
+6. 00:56.995, turn 6: plain `The n-k dream condition holds`, boosted `The Nkemdirim condition holds`.
+7. 00:59.192, turn 6: plain `Rabi-Konath`, boosted `Ravindranath`.
+8. 01:11.050, turn 7: plain `Adami-Lindquist`, boosted `Adeyemi-Lindqvist`.
+9. 01:16.947, turn 8: plain `the Tirunavukkarasu criterion falls`, boosted `the Thirunavukkarasu criterion falls`.
+
+**No keyterm on either side**
+
+10. 00:10.126, turn 0: plain `Okonkwo's location in the course`, boosted `Okonkwo's location in the globe`.
+11. 00:11.630, turn 1: plain `strengths.`, boosted `strength.`
+12. 00:15.235, turn 2: plain `we'll write kappa.`, boosted `we will write kappa.`
+13. 00:27.755, turn 3: plain `not the Weystrass form.`, boosted `not the Wistress form.`
+14. 00:55.202, turn 6: plain `we'll write kappa.`, boosted `we will write kappa.`
+15. 01:07.900, turn 7: plain `Weystrass`, boosted `Wistress`.
+
+Hunks 13 and 15 change the rendering of a proper noun that is not in the keyterm list, at both readings.
+Which run matches what was said at any of the fifteen points cannot be determined from these files.
+
+## Fixed, regressed, neither
+
+- **Terms the plain run did not render and the boosted run rendered: 4 terms, 8 spans.** `Nkemdirim`,
+  `Ravindranath`, `Adeyemi-Lindqvist`, `Thirunavukkarasu`, at both readings each. At every one of the eight
+  positions the plain run has something other than the term (listed in the table above) and the boosted run has
+  the exact string from `keyterms_prompt`. The files show that the boosted run produced the supplied string at
+  these positions; they do not show whether that string is what was spoken, so "got right" is not a claim these
+  files support.
+- **Terms neither run rendered: 0.** Every one of the ten terms occurs at least twice in the boosted run. Six
+  (`Venkataraman`, `Bhattacharya`, `Okonkwo`, `Szymanski`, `kappa`, `self-adjoint`) occur in the plain run too, at
+  the same positions, rendered identically, so the boost changed nothing for them.
+- **Positions where the plain run rendered a term and the boosted run did not: 0.**
+- **Regressions.** Nothing in the files is classifiable as a regression without a reference, but one position is
+  unlike the eight above and is flagged: hunk 5, 00:51.971, turn 5, `differs from strengths.` (plain) against
+  `differs from Szymanski's.` (boosted). It is the only boosted-only term occurrence that has no counterpart in
+  the other reading: at the first reading of the same sentence both runs rendered a non-term (`strengths.`,
+  `strength.`), and at the second reading the boosted run alone rendered a keyterm. Its word confidence, 0.834, is
+  the lowest of the 21 term-bearing words in the boosted run; the next lowest is 0.983. Whether it is a keyterm
+  substituted for a different spoken word or a term both runs otherwise missed cannot be determined from the two
+  files.
+
+Net over all ten terms: 12 term occurrences in the plain run, 21 in the boosted run, 12 aligned identically,
+9 boosted-only, 0 plain-only.
+
+## Other numbers from the same two files
+
+- `SpeakerRevision`: one frame in each run, line 53, received after the local `sent_terminate` event and before
+  `Termination` (67 ms and 194 ms after `audio_done` respectively). Five revisions in each, for turns 0, 2, 4,
+  6 and 9. Turn 0 is relabelled `B` (13 `B` words, 6 `A`); turns 2 and 6 keep label `A` with word-level
+  speakers split `A` 12 / `B` 12 and `A` 13 / `B` 12 in plain, `A` 13 / `B` 11 and `A` 14 / `B` 11 in boosted;
+  turns 4 and 9 are all `A`. The finals themselves carry `A` on all ten turns in both runs. This is the frame
+  the `docs/fixtures/NOTES.md` addendum of 2026-09-19 records as "captured once"; it is now in two of two
+  captures on this audio.
+- Word-level `speaker` on finals: plain `A` 163, `PENDING` 7; boosted `A` 160, `PENDING` 7. No final has
+  `speaker_label` `PENDING` in either run.
+- Turn 4 is the only turn whose word count differs between runs (16 plain, 13 boosted). The other nine turns
+  have equal word counts.
+
+## Word error rate
+
+Not computed. It requires a reference transcript of `audio/jargon.wav`. With it, the same tokenisation and
+alignment give WER for each run and per-term recall, and would classify each of the nine boosted-only spans
+and the six non-term hunks as a fix, a regression, or neither.
