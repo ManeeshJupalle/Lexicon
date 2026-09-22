@@ -153,7 +153,8 @@ Fill these in as they are verified. Claims only go here once measured against th
   with the words inside the same final (NOTES, "Speaker information"), so the per-word `speaker` is
   what the gutter reads, and a line whose words disagree gets a neutral gutter rather than a guess.
   The line is not split into per-speaker runs — the word data would support it, but it turns one
-  caption into a list. Rare in the captures: 1 of 20 finals in the interview runs.
+  caption into a list. Rare in the captures: 1 of 20 finals in the interview runs (since removed, see
+  NOTES), and no Strang or jargon final mixes `A` and `B`.
 - **Ask-panel answers are grounded, not verified correct.** Every answer the client sees cites lines that
   were in the rolling window and carries a passage the proxy checked verbatim against those lines
   (`server/answer/ask.ts`); anything that fails that check reaches the client as "not found", never as an
@@ -172,9 +173,11 @@ Fill these in as they are verified. Claims only go here once measured against th
   student saw "not found". Under the per-passage rule the rerun of the same question landed, citing three
   lines with three verbatim passages. A verdict can still be refused for quoting across a gap or
   paraphrasing, and that is the intended side to fail on.
-- **Ask latency: 2.4 to 4.5 s per question**, ten asks over two live runs, inputs of 752 to 1339 tokens,
-  `gpt-5.6-luna` at low reasoning effort (`docs/data/ask-measurement.md`, "Latency"). The three extraction
-  answers used no reasoning tokens; only the two refusals did.
+- **Ask latency: 2.4 to 4.5 s per question** over eleven asks in the three P3 gate runs, inputs of 752 to
+  1339 tokens (`docs/data/ask-measurement.md`, "Latency"), **and 3.3 to 5.4 s** over five asks in the
+  20-minute P4 run (`docs/data/session-output-measurement.md`), all `gpt-5.6-luna` at low reasoning effort.
+  Reasoning tokens ranged from 0 to 152 per ask. In P3 runs 1 and 2 only the refusals used them, but the
+  run 3 extraction answer used 89, and two of the four P4 refusals used none.
 - **Citations for the same question vary between runs.** The same 180 s of audio produced 34, 30 and 31
   finals across the capture and two live sessions, with word-level differences (`its nth column` against
   `infinity` at 2:09) and different turn boundaries around the same sentences (`docs/data/ask-measurement.md`,

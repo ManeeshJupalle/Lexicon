@@ -54,11 +54,6 @@ export const FIXTURES: Record<string, Fixture> = {
     sent: STRANG_TERMS,
     draft: STRANG_TERMS,
   },
-  interview: {
-    load: () => import("../../../docs/fixtures/aai-stream.jsonl?raw"),
-    sent: [],
-    draft: [],
-  },
 };
 
 export type FixtureName = keyof typeof FIXTURES;
