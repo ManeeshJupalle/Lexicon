@@ -21,6 +21,18 @@ export function scrollToLive(): void {
   if (container !== null) container.scrollTop = container.scrollHeight;
 }
 
+/** Scroll so the cited line sits one line below the top of the view. The line above is
+ *  shown as context, not as part of the citation: with turns cut mid-sentence the cited
+ *  line often opens partway through a sentence that the previous line began. */
+export function scrollToFinal(id: string): boolean {
+  if (container === null) return false;
+  const target = container.querySelector<HTMLElement>('[data-final-id="' + CSS.escape(id) + '"]');
+  if (target === null) return false;
+  const anchor = target.previousElementSibling instanceof HTMLElement ? target.previousElementSibling : target;
+  container.scrollTop = anchor.getBoundingClientRect().top - container.getBoundingClientRect().top + container.scrollTop;
+  return true;
+}
+
 export function isAtBottom(): boolean {
   if (container === null) return true;
   return container.scrollHeight - container.scrollTop - container.clientHeight <= BOTTOM_THRESHOLD_PX;

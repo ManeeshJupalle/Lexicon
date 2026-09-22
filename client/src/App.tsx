@@ -1,4 +1,5 @@
 import { useStore } from "./store.ts";
+import { AskPanel } from "./components/AskPanel.tsx";
 import { CaptionStream } from "./components/CaptionStream.tsx";
 import { GlossaryPanel } from "./components/GlossaryPanel.tsx";
 import { StatusBar } from "./components/StatusBar.tsx";
@@ -14,7 +15,10 @@ export function App() {
       <StatusBar />
       <main className="main">
         <CaptionStream />
-        <GlossaryPanel />
+        <div className="side">
+          <AskPanel />
+          <GlossaryPanel />
+        </div>
       </main>
       <ReplayControl />
     </div>

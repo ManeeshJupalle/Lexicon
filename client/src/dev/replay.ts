@@ -166,3 +166,13 @@ function toClientMessage(turn: RawTurn, receivedAt: string): FinalMessage | Part
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
+
+// DEV-ONLY, like everything in this file: the store on window, so a canned answer can be
+// injected from the devtools console and the citation control exercised end to end
+// without a model call. Deleted with the rest of client/src/dev/.
+declare global {
+  interface Window {
+    __lexiconStore?: typeof useStore;
+  }
+}
+if (import.meta.env.DEV) window.__lexiconStore = useStore;

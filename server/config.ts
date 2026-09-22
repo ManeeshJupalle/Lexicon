@@ -11,6 +11,11 @@ export const PORT = intFromEnv("PORT", 8787);
  *  server still starts, /health reports it, and /ws refuses with a typed status. */
 export const ASSEMBLYAI_API_KEY = process.env.ASSEMBLYAI_API_KEY ?? "";
 
+/** P3 answer layer (OpenAI, see answer/model.ts). Same handling as the AssemblyAI key:
+ *  read once, never sent to the client; empty means "not configured", the server still
+ *  starts, /health reports it, and a question gets a typed error instead of an answer. */
+export const OPENAI_API_KEY = process.env.OPENAI_API_KEY ?? "";
+
 /** Rolling transcript window. Configurable, default 10 minutes. */
 export const TRANSCRIPT_WINDOW_MS = intFromEnv("TRANSCRIPT_WINDOW_MS", 10 * 60_000);
 

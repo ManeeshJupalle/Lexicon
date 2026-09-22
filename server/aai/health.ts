@@ -35,8 +35,11 @@ export function noteUpstreamError(message: string): void {
 }
 
 export interface HealthReport {
+  /** Captions can be served. The answer layer being unconfigured degrades the ask panel,
+   *  not the captions, so it is reported beside `ok` rather than folded into it. */
   ok: boolean;
   apiKeyConfigured: boolean;
+  answerConfigured: boolean;
   upstream: {
     probed: false;
     note: string;
@@ -48,10 +51,11 @@ export interface HealthReport {
   };
 }
 
-export function healthReport(apiKeyConfigured: boolean): HealthReport {
+export function healthReport(apiKeyConfigured: boolean, answerConfigured: boolean): HealthReport {
   return {
     ok: apiKeyConfigured,
     apiKeyConfigured,
+    answerConfigured,
     upstream: {
       probed: false,
       note: "no upstream probe is performed; liveSessions and lastFrameAt are observed traffic, silence is not a failure signal",

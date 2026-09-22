@@ -1,5 +1,6 @@
 // zustand store. Holds exactly what BUILD_PROMPTS P2 specifies: the partial line, the
-// finals array, the glossary terms, and the connection status.
+// finals array, the glossary terms, and the connection status. P3 adds the questions
+// asked this session and the citation highlight.
 //
 // SPEAKER REVISIONS ARE NOT APPLIED TO `finals`, DELIBERATELY.
 //
@@ -25,7 +26,7 @@
 // session ends, not an in-place rewrite of lines on screen.
 
 import { create } from "zustand";
-import type { FinalMessage, PartialMessage, ServerMessage, StatusCode } from "../../server/protocol.ts";
+import type { AskResult, FinalMessage, PartialMessage, ServerMessage, StatusCode } from "../../server/protocol.ts";
 
 /** Server status codes plus the states the client reaches on its own, before or after any
  *  socket exists. Kept distinct from StatusCode so the wire contract stays the server's. */
@@ -39,6 +40,15 @@ export const MIN_FONT_PX = FONT_STEPS[0];
 /** The proxy splits the keyterms query parameter on commas (server/aai/session.ts,
  *  normaliseKeyterms) and caps the list at 100. */
 export const MAX_KEYTERMS = 100;
+
+/** One question and, once the proxy answers, its result. */
+export interface AskState {
+  askId: string;
+  question: string;
+  askedAt: number;
+  result: AskResult | null;
+  elapsedMs: number | null;
+}
 
 interface LexiconState {
   status: UiStatus;
@@ -60,6 +70,12 @@ interface LexiconState {
    *  finals list subscribes to. */
   partial: PartialMessage | null;
 
+  /** P3. Questions asked this session, newest first. Session-scoped: cleared on the next
+   *  session start, kept on screen after a stop so the last answers can still be read. */
+  asks: AskState[];
+  /** Final ids highlighted in the caption view by the last citation click. */
+  highlight: ReadonlySet<string>;
+
   glossary: {
     /** Raw textarea contents, one term per line. */
     draft: string;
@@ -79,6 +95,8 @@ interface LexiconState {
   setDraft: (draft: string) => void;
   setFontPx: (px: number) => void;
   setFollowLive: (follow: boolean) => void;
+  addAsk: (ask: AskState) => void;
+  setHighlight: (ids: readonly string[]) => void;
 }
 
 export const useStore = create<LexiconState>((set) => ({
@@ -88,6 +106,8 @@ export const useStore = create<LexiconState>((set) => ({
   localError: null,
   finals: [],
   partial: null,
+  asks: [],
+  highlight: new Set<string>(),
   glossary: { draft: "", applied: [] },
   fontPx: MIN_FONT_PX,
   followLive: true,
@@ -108,6 +128,14 @@ export const useStore = create<LexiconState>((set) => ({
           // it here rather than waiting for the next partial stops the in-flight line
           // showing a stale duplicate of the final directly above it.
           return { finals: [...state.finals, message], partial: null };
+        case "answer":
+          // Attach the result to its question. Nothing else moves: an answer arriving must
+          // not touch `finals` or `partial`.
+          return {
+            asks: state.asks.map((ask) =>
+              ask.askId === message.askId ? { ...ask, result: message.result, elapsedMs: message.elapsedMs } : ask,
+            ),
+          };
       }
     }),
 
@@ -118,6 +146,8 @@ export const useStore = create<LexiconState>((set) => ({
     set((state) => ({
       finals: [],
       partial: null,
+      asks: [],
+      highlight: new Set<string>(),
       bufferedFinals: 0,
       localError: null,
       status: "connecting",
@@ -130,6 +160,8 @@ export const useStore = create<LexiconState>((set) => ({
   setDraft: (draft) => set((state) => ({ glossary: { ...state.glossary, draft } })),
   setFontPx: (fontPx) => set({ fontPx }),
   setFollowLive: (followLive) => set({ followLive }),
+  addAsk: (ask) => set((state) => ({ asks: [ask, ...state.asks] })),
+  setHighlight: (ids) => set({ highlight: new Set(ids) }),
 }));
 
 /** Textarea text to a term list. Commas split as well as newlines: the proxy's query

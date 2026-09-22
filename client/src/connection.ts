@@ -9,8 +9,9 @@
 // and the pcm16-writer worklet. Chunk size matches the P0 capture script, so the proxy
 // sees the cadence the fixtures were recorded at.
 
+import type { AskMessage } from "../../server/protocol.ts";
 import { SAMPLE_RATE } from "./constants.ts";
-import { useStore } from "./store.ts";
+import { parseTerms, useStore } from "./store.ts";
 
 let socket: WebSocket | null = null;
 let context: AudioContext | null = null;
@@ -85,6 +86,22 @@ export async function startSession(terms: string[]): Promise<void> {
   socket.onerror = () => {
     useStore.getState().setLocalError("The connection to the caption server failed.");
   };
+}
+
+let askSeq = 0;
+
+/** Send a question up the open socket. The glossary goes with it as the client holds it
+ *  now, applied and pending alike (protocol.ts, AskMessage.terms). False when there is no
+ *  open socket, which includes a fixture replay: the panel says so rather than waiting. */
+export function askQuestion(question: string): boolean {
+  if (socket === null || socket.readyState !== WebSocket.OPEN) return false;
+  askSeq += 1;
+  const askId = "ask-" + Date.now().toString(36) + "-" + askSeq;
+  const terms = parseTerms(useStore.getState().glossary.draft);
+  const message: AskMessage = { type: "ask", askId, question, terms };
+  socket.send(JSON.stringify(message));
+  useStore.getState().addAsk({ askId, question, askedAt: Date.now(), result: null, elapsedMs: null });
+  return true;
 }
 
 export async function stopSession(detail?: string): Promise<void> {

@@ -1,0 +1,169 @@
+{
+  "startedAt": "2026-09-22T00:07:31.429Z",
+  "finishedAt": "2026-09-22T00:08:38.493Z",
+  "wav": "audio/strang-3min.wav",
+  "pcmBytes": 5758976,
+  "port": "8794",
+  "terms": [
+    "eigenvector",
+    "eigenvalue",
+    "lambda",
+    "diagonalize",
+    "linearly independent",
+    "eigenvector matrix",
+    "invert",
+    "columns"
+  ],
+  "statuses": [
+    {
+      "at": 50,
+      "code": "connecting",
+      "detail": "opening upstream session with 8 keyterms"
+    },
+    {
+      "at": 3700,
+      "code": "live",
+      "detail": "upstream session 3a25ff6b-c9c4-4195-a14c-bbb12a911c56 on universal-3-5-pro",
+      "sessionId": "3a25ff6b-c9c4-4195-a14c-bbb12a911c56",
+      "bufferedFinals": 0
+    }
+  ],
+  "partials": 17,
+  "finals": [
+    {
+      "id": "1-0",
+      "startMs": 3700,
+      "endMs": 13699,
+      "speakerLabel": "A",
+      "text": "matrix A, I put its eigenvectors in the columns of a matrix S. So S will be the eigenvector matrix, and I want to look at"
+    },
+    {
+      "id": "1-1",
+      "startMs": 13716,
+      "endMs": 13875,
+      "speakerLabel": "PENDING",
+      "text": "this."
+    },
+    {
+      "id": "1-2",
+      "startMs": 15372,
+      "endMs": 18580,
+      "speakerLabel": "A",
+      "text": "Magic combination S inverse AS."
+    },
+    {
+      "id": "1-3",
+      "startMs": 19540,
+      "endMs": 29507,
+      "speakerLabel": "A",
+      "text": "So can I show you how that— what happens there? And notice, notice, there's an S inverse. We have to be able to"
+    },
+    {
+      "id": "1-4",
+      "startMs": 29627,
+      "endMs": 30091,
+      "speakerLabel": "PENDING",
+      "text": "invert."
+    },
+    {
+      "id": "1-5",
+      "startMs": 31124,
+      "endMs": 39467,
+      "speakerLabel": "A",
+      "text": "this eigenvector matrix S. So for that, we need n independent eigenvectors. So that's the—"
+    },
+    {
+      "id": "1-6",
+      "startMs": 40586,
+      "endMs": 42512,
+      "speakerLabel": "PENDING",
+      "text": "That's the case. Okay, so."
+    },
+    {
+      "id": "1-7",
+      "startMs": 44078,
+      "endMs": 44764,
+      "speakerLabel": "PENDING",
+      "text": "Suppose."
+    },
+    {
+      "id": "1-8",
+      "startMs": 47228,
+      "endMs": 52765,
+      "speakerLabel": "A",
+      "text": "We have n linearly independent eigenvectors."
+    },
+    {
+      "id": "1-9",
+      "startMs": 56938,
+      "endMs": 57123,
+      "speakerLabel": "PENDING",
+      "text": "Of A."
+    },
+    {
+      "id": "1-10",
+      "startMs": 60804,
+      "endMs": 61472,
+      "speakerLabel": "PENDING",
+      "text": "Put them."
+    }
+  ],
+  "asks": [
+    {
+      "label": "real-1",
+      "askId": "gate-real-1",
+      "question": "What is needed to be able to invert S?",
+      "askedAtAudioMs": 60000,
+      "finalsHeldClientSide": 10,
+      "lastFinalEndMs": 57123,
+      "sentAt": 1790035711430,
+      "roundTripMs": 4023,
+      "serverElapsedMs": 4022,
+      "result": {
+        "kind": "answer",
+        "answer": "To invert S, you need n linearly independent eigenvectors of A.",
+        "evidence": [
+          "this eigenvector matrix S. So for that, we need n independent eigenvectors.",
+          "We have n linearly independent eigenvectors.",
+          "Of A."
+        ],
+        "citation": {
+          "finalIds": [
+            "1-5",
+            "1-8",
+            "1-9"
+          ],
+          "startMs": 31124,
+          "endMs": 57123,
+          "contiguous": false
+        },
+        "held": {
+          "startMs": 3700,
+          "endMs": 57123,
+          "lines": 10
+        }
+      },
+      "citedLines": [
+        {
+          "id": "1-5",
+          "startMs": 31124,
+          "endMs": 39467,
+          "text": "this eigenvector matrix S. So for that, we need n independent eigenvectors. So that's the—"
+        },
+        {
+          "id": "1-8",
+          "startMs": 47228,
+          "endMs": 52765,
+          "text": "We have n linearly independent eigenvectors."
+        },
+        {
+          "id": "1-9",
+          "startMs": 56938,
+          "endMs": 57123,
+          "text": "Of A."
+        }
+      ],
+      "unresolvedIds": []
+    }
+  ]
+}

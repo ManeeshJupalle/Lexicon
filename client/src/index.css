@@ -287,18 +287,195 @@ body {
   background: #1e242d;
 }
 
-/* ---- glossary ---- */
+/* ---- side column: ask panel over glossary ---- */
 
-.glossary {
-  width: 330px;
+.side {
+  width: 360px;
   flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--bg-raised);
+  border-left: 1px solid var(--border);
+}
+
+/* ---- ask panel ---- */
+
+.ask {
+  flex: 1 1 55%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 12px;
   padding: 20px;
   overflow-y: auto;
-  background: var(--bg-raised);
-  border-left: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.ask h2 {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.ask-help,
+.ask-note {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+  color: var(--text-faint);
+}
+
+.ask-form {
+  display: flex;
+  gap: 8px;
+}
+
+.ask-input {
+  flex: 1;
+  min-width: 0;
+  font: inherit;
+  font-size: 14px;
+  padding: 9px 11px;
+  color: var(--text);
+  background: var(--bg-sunken);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+}
+
+.ask-input:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.ask-input:disabled {
+  opacity: 0.5;
+}
+
+.ask-submit {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  padding: 9px 14px;
+  color: #0c1416;
+  background: var(--accent);
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.ask-submit:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.ask-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.ask-item {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.ask-q {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+}
+
+.ask-answer {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* The model's verbatim anchor, verified by the proxy. Monospace and a rule mark it as a
+   fragment lifted from the captions; the ellipses say where it was cut. */
+.ask-evidence {
+  margin: 0;
+  padding-left: 10px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.5;
+  color: var(--text-dim);
+  border-left: 2px solid #46505f;
+}
+
+/* A time range and a line count, deliberately not a quotation mark in sight. */
+.ask-cite {
+  align-self: flex-start;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 11px;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.ask-cite:hover {
+  background: #172a30;
+}
+
+.ask-pending {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+.ask-notfound {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--warn);
+}
+
+.ask-error {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.45;
+  color: var(--bad);
+}
+
+/* ---- cited caption lines ---- */
+
+.line-cited .line-text {
+  background: rgba(90, 209, 230, 0.12);
+  box-shadow: 0 0 0 6px rgba(90, 209, 230, 0.12);
+  border-radius: 4px;
+}
+
+.line-time {
+  align-self: flex-start;
+  margin-top: 0.4em;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--accent);
+}
+
+/* ---- glossary ---- */
+
+.glossary {
+  flex: 1 1 45%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .glossary h2 {
