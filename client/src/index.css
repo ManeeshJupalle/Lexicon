@@ -579,6 +579,172 @@ body {
   color: var(--warn);
 }
 
+/* ---- session output (P4) ---- */
+
+/* Reading material rather than a live stream, but the same reader: body text rides the
+   caption size, the anchors sit one step down and never below 14px. */
+.output {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  padding: 22px 28px 40px;
+}
+
+.output-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+}
+
+.output h2 {
+  margin: 0 0 4px;
+  font-size: calc(var(--caption-size) * 0.9);
+  font-weight: 700;
+}
+
+.output h3 {
+  margin: calc(var(--caption-size) * 1.1) 0 calc(var(--caption-size) * 0.4);
+  font-size: max(14px, calc(var(--caption-size) * 0.6));
+  font-weight: 650;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.output-meta,
+.output-note,
+.output-empty {
+  margin: 0;
+  max-width: 60em;
+  font-size: max(14px, calc(var(--caption-size) * 0.6));
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
+.output-note {
+  margin-top: 10px;
+}
+
+.output-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.output-button {
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  padding: 8px 13px;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid #46505f;
+  border-radius: 7px;
+  cursor: pointer;
+}
+
+.output-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.output-list {
+  margin: 0;
+  padding-left: 1.3em;
+}
+
+.output-terms,
+.output-notshown {
+  list-style: none;
+  padding-left: 0;
+}
+
+.output-point {
+  margin: 0 0 calc(var(--caption-size) * 0.9);
+}
+
+.output-text {
+  margin: 0;
+  max-width: 28em;
+  font-size: var(--caption-size);
+  line-height: 1.45;
+}
+
+.output-term {
+  margin: 0 0 2px;
+  font-size: var(--caption-size);
+  font-weight: 700;
+}
+
+/* The verbatim anchors beneath a paraphrase: the citation control first, then each
+   checked passage as a fragment with its ellipses. */
+.output-anchors {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 12px;
+  margin-top: 8px;
+}
+
+.output-passage {
+  padding-left: 8px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: max(14px, calc(var(--caption-size) * 0.55));
+  line-height: 1.5;
+  color: var(--text-dim);
+  border-left: 2px solid #46505f;
+}
+
+.output-table {
+  border-collapse: collapse;
+  max-width: 100%;
+  font-size: max(15px, calc(var(--caption-size) * 0.65));
+  line-height: 1.45;
+}
+
+.output-table th,
+.output-table td {
+  padding: 8px 12px 8px 0;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid var(--border);
+}
+
+.output-table th {
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+
+.output-term-cell {
+  font-weight: 700;
+}
+
+.output-candidate {
+  display: inline-block;
+  margin: 2px 6px 2px 0;
+  font: inherit;
+  font-size: inherit;
+  padding: 2px 9px;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.output-notshown li {
+  margin: 0 0 6px;
+  font-size: max(14px, calc(var(--caption-size) * 0.6));
+  color: var(--warn);
+}
+
 /* ---- focus ---- */
 
 button:focus-visible {

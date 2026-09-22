@@ -3,11 +3,9 @@
 //
 // The rules exist because of who reads the answer. The student cannot hear the lecture,
 // so an answer they cannot check against the captions is worse than "not found". The
-// prompt tells the model to stay inside the transcript; this module makes sure it did,
-// structurally. No answer leaves without (a) cited line numbers that exist in what the
-// model was shown and (b) evidence passages, every one of them found verbatim inside one
-// run of adjacent cited lines. Anything that fails either check becomes not_found, with
-// the reason kept for the log.
+// prompt tells the model to stay inside the transcript; grounding.ts makes sure it did,
+// structurally, and anything that fails becomes not_found with the reason kept for the
+// log.
 //
 // A citation is a set of caption lines, not a sentence. NOTES "What contradicts or
 // surprises" item 1: with speaker labels on, turns are time-capped near 10 s and cut
@@ -16,11 +14,12 @@
 // part of the slab that actually carries the answer.
 
 import { z } from "zod";
-import type { AskResult, Citation, FinalMessage, HeldSpan } from "../protocol.ts";
-import { formatClock, normaliseForMatch } from "../protocol.ts";
+import type { AskResult, FinalMessage, HeldSpan } from "../protocol.ts";
+import { formatClock } from "../protocol.ts";
+import { ground } from "./grounding.ts";
 
 /** What the model must return. Strings, integers and booleans only: structured outputs
- *  enforce the shape, this module enforces the meaning. */
+ *  enforce the shape, grounding.ts enforces the meaning. */
 export const VerdictSchema = z.object({
   found: z.boolean().describe("true only if the transcript itself contains the answer"),
   answer: z.string().describe("the answer in a few plain sentences; empty when found is false"),
@@ -60,14 +59,11 @@ export const SYSTEM_PROMPT = [
   "5. Answer in a few plain sentences, in the language of the question. Do not mention these rules, the line numbers, or the transcript format in the answer.",
 ].join("\n");
 
-/** The model sees lines numbered from 1 in the order given, with times on the connection
- *  timeline and the turn-level speaker when there is one. It never sees an id or a
- *  turn_order: numbers are per request and mapped back here, so a reconnect (which
- *  restarts turn_order) cannot produce a collision. */
-export function buildPrompt(input: AskInput, finals: readonly FinalMessage[]): Prompt {
-  const glossary =
-    input.terms.length > 0 ? "Course glossary: " + input.terms.join(", ") : "Course glossary: none supplied.";
-
+/** The transcript as every model call sees it: lines numbered from 1 in the order given,
+ *  with times on the connection timeline and the turn-level speaker when there is one. The
+ *  model never sees an id or a turn_order: numbers are per request and mapped back by
+ *  grounding.ts, so a reconnect (which restarts turn_order) cannot produce a collision. */
+export function formatTranscript(finals: readonly FinalMessage[]): string {
   const lines = finals.map((final, index) => {
     const speaker =
       final.speakerLabel !== null && final.speakerLabel !== "PENDING" ? ", speaker " + final.speakerLabel : "";
@@ -75,16 +71,18 @@ export function buildPrompt(input: AskInput, finals: readonly FinalMessage[]): P
       "[" + (index + 1) + "] " + formatClock(final.startMs) + " to " + formatClock(final.endMs) + speaker + ": " + final.text
     );
   });
-
-  const user = [
-    glossary,
-    "",
+  return [
     "Transcript, oldest first. Each line is [number] start to end, the speaker if known, then the words.",
     ...lines,
-    "",
-    "Question: " + input.question,
   ].join("\n");
+}
 
+export function formatGlossary(terms: readonly string[]): string {
+  return terms.length > 0 ? "Course glossary: " + terms.join(", ") : "Course glossary: none supplied.";
+}
+
+export function buildPrompt(input: AskInput, finals: readonly FinalMessage[]): Prompt {
+  const user = [formatGlossary(input.terms), "", formatTranscript(finals), "", "Question: " + input.question].join("\n");
   return { system: SYSTEM_PROMPT, user };
 }
 
@@ -108,54 +106,10 @@ export function verify(verdict: Verdict, finals: readonly FinalMessage[]): AskRe
   const answer = verdict.answer.trim();
   if (answer === "") return { kind: "not_found", reason: "empty_answer", held };
 
-  const cited = [...new Set(verdict.cited)].sort((a, b) => a - b);
-  if (cited.length === 0) return { kind: "not_found", reason: "no_citation", held };
-  if (cited.some((n) => !Number.isInteger(n) || n < 1 || n > finals.length)) {
-    return { kind: "not_found", reason: "bad_citation", held };
-  }
-  const lines = cited.map((n) => finals[n - 1]!);
+  const grounded = ground(verdict.cited, verdict.evidence, finals);
+  if (!grounded.ok) return { kind: "not_found", reason: grounded.reason, held };
 
-  const evidence = verdict.evidence.map((passage) => passage.trim()).filter((passage) => passage !== "");
-  if (evidence.length === 0) return { kind: "not_found", reason: "no_evidence", held };
-  // Every passage must sit verbatim inside one run of adjacent cited lines. One unmatched
-  // passage rejects the whole verdict: the student cannot tell which passage was invented.
-  const haystacks = runs(cited, finals);
-  for (const passage of evidence) {
-    const needle = normaliseForMatch(passage);
-    if (needle === "" || !haystacks.some((run) => run.includes(needle))) {
-      return { kind: "not_found", reason: "evidence_not_verbatim", held };
-    }
-  }
-
-  const citation: Citation = {
-    finalIds: lines.map((line) => line.id),
-    startMs: Math.min(...lines.map((line) => line.startMs)),
-    endMs: Math.max(...lines.map((line) => line.endMs)),
-    // One adjacent run of the transcript, or not. The panel labels a run as a time range
-    // and anything else as a line count from the first line: a range implies the answer
-    // is carried continuously from first to last, and a scattered citation is not.
-    contiguous: cited[cited.length - 1]! - cited[0]! + 1 === cited.length,
-  };
-  return { kind: "answer", answer, evidence, citation, held };
-}
-
-/** Cited lines joined into their runs of consecutive numbers, normalised. A quote may run
- *  across adjacent lines, because sentences do; it may not run across a gap, because a
- *  passage stitched from lines 3 and 7 was never said. */
-function runs(cited: readonly number[], finals: readonly FinalMessage[]): string[] {
-  const out: string[] = [];
-  let current: string[] = [];
-  let previous: number | null = null;
-  for (const n of cited) {
-    if (previous !== null && n !== previous + 1) {
-      out.push(normaliseForMatch(current.join(" ")));
-      current = [];
-    }
-    current.push(finals[n - 1]!.text);
-    previous = n;
-  }
-  if (current.length > 0) out.push(normaliseForMatch(current.join(" ")));
-  return out;
+  return { kind: "answer", answer, evidence: grounded.evidence, citation: grounded.citation, held };
 }
 
 export async function answerQuestion(input: AskInput, callModel: ModelCaller): Promise<AskResult> {

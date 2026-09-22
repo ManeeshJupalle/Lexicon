@@ -1,9 +1,9 @@
 import { useState } from "react";
-import type { AskResult, Citation, FinalMessage } from "../../../server/protocol.ts";
+import type { AskResult, FinalMessage } from "../../../server/protocol.ts";
 import { MAX_QUESTION_CHARS, formatClock } from "../../../server/protocol.ts";
+import { citationLabel } from "../../../server/answer/markdown.ts";
 import { evidenceFragment, resolveCitation } from "../citation.ts";
 import { askQuestion } from "../connection.ts";
-import { scrollToFinal } from "../scroller.ts";
 import { isSessionActive, useStore, type AskState } from "../store.ts";
 
 /** Questions about what was said, answered from this session's captions and nothing else.
@@ -79,22 +79,18 @@ export function AskPanel() {
 }
 
 function AskItem({ ask, finals }: { ask: AskState; finals: readonly FinalMessage[] }) {
-  const setHighlight = useStore((state) => state.setHighlight);
-  const setFollowLive = useStore((state) => state.setFollowLive);
+  const jumpToFinal = useStore((state) => state.jumpToFinal);
   const [offScreen, setOffScreen] = useState(false);
   const result = ask.result;
 
   const jump = (result: Extract<AskResult, { kind: "answer" }>) => {
     const ids = resolveCitation(result.citation, finals);
-    const first = ids[0];
-    if (first === undefined) {
+    if (ids.length === 0) {
       setOffScreen(true);
       return;
     }
     setOffScreen(false);
-    setFollowLive(false);
-    setHighlight(ids);
-    scrollToFinal(first);
+    jumpToFinal(ids);
   };
 
   return (
@@ -127,17 +123,6 @@ function AskItem({ ask, finals }: { ask: AskState; finals: readonly FinalMessage
       {result?.kind === "error" && <p className="ask-error">{errorText(result)}</p>}
     </li>
   );
-}
-
-/** One adjacent run reads as a range. Scattered support reads as a count from the first
- *  line: a range would imply the answer is carried continuously from first to last. */
-function citationLabel(citation: Citation): string {
-  const n = citation.finalIds.length;
-  const lines = n + (n === 1 ? " line" : " lines");
-  if (citation.contiguous) {
-    return "Captions " + formatClock(citation.startMs) + " to " + formatClock(citation.endMs) + " · " + lines;
-  }
-  return lines + " from " + formatClock(citation.startMs);
 }
 
 function citedLines(result: Extract<AskResult, { kind: "answer" }>, finals: readonly FinalMessage[]): FinalMessage[] {

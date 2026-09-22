@@ -1,0 +1,2205 @@
+{
+  "startedAt": "2026-09-22T02:25:09.207Z",
+  "finishedAt": "2026-09-22T02:45:30.827Z",
+  "wav": "audio/strang.wav",
+  "pcmBytes": 99521840,
+  "port": "8796",
+  "terms": [
+    "eigenvector",
+    "eigenvalue",
+    "lambda",
+    "diagonalize",
+    "linearly independent",
+    "eigenvector matrix",
+    "invert",
+    "columns"
+  ],
+  "statuses": [
+    {
+      "at": 50,
+      "code": "connecting",
+      "detail": "opening upstream session with 8 keyterms"
+    },
+    {
+      "at": 4600,
+      "code": "live",
+      "detail": "upstream session 25e55ff8-b9e7-43b9-9fd7-2811aa09c43f on universal-3-5-pro",
+      "sessionId": "25e55ff8-b9e7-43b9-9fd7-2811aa09c43f",
+      "bufferedFinals": 0
+    }
+  ],
+  "partials": 351,
+  "finals": [
+    {
+      "id": "1-0",
+      "startMs": 9129,
+      "endMs": 14487,
+      "speakerLabel": "A",
+      "text": "OK, so we start— this is the second lecture on eigenvalues."
+    },
+    {
+      "id": "1-1",
+      "startMs": 15413,
+      "endMs": 25219,
+      "speakerLabel": "A",
+      "text": "So the first lecture reached the key equation, Ax equals lambda x. x is the eigenvector and lambda"
+    },
+    {
+      "id": "1-2",
+      "startMs": 25252,
+      "endMs": 26214,
+      "speakerLabel": "PENDING",
+      "text": "is the eigenvalue."
+    },
+    {
+      "id": "1-3",
+      "startMs": 27125,
+      "endMs": 27293,
+      "speakerLabel": "PENDING",
+      "text": "Now—"
+    },
+    {
+      "id": "1-4",
+      "startMs": 28630,
+      "endMs": 32368,
+      "speakerLabel": "A",
+      "text": "to use that. And the good way to"
+    },
+    {
+      "id": "1-5",
+      "startMs": 34448,
+      "endMs": 35327,
+      "speakerLabel": "PENDING",
+      "text": "After we've found—"
+    },
+    {
+      "id": "1-6",
+      "startMs": 36372,
+      "endMs": 40937,
+      "speakerLabel": "A",
+      "text": "So job one is to find the eigenvalues and find the eigenvectors."
+    },
+    {
+      "id": "1-7",
+      "startMs": 42021,
+      "endMs": 51569,
+      "speakerLabel": "A",
+      "text": "Now after we've found them, what do we do with them? Well, the good way to see that is diagonalize the matrix. So the matrix is A."
+    },
+    {
+      "id": "1-8",
+      "startMs": 52982,
+      "endMs": 61340,
+      "speakerLabel": "A",
+      "text": "And I want to show, first of all, this is like the basic fact. This formula, that's the key to today's lecture."
+    },
+    {
+      "id": "1-9",
+      "startMs": 63294,
+      "endMs": 72163,
+      "speakerLabel": "A",
+      "text": "This matrix A, I put its eigenvectors in the columns of a matrix S. So S will be the eigenvector matrix."
+    },
+    {
+      "id": "1-10",
+      "startMs": 72841,
+      "endMs": 73953,
+      "speakerLabel": "A",
+      "text": "And I want to look at this—"
+    },
+    {
+      "id": "1-11",
+      "startMs": 75405,
+      "endMs": 78614,
+      "speakerLabel": "A",
+      "text": "Magic combination S inverse AS."
+    },
+    {
+      "id": "1-12",
+      "startMs": 79540,
+      "endMs": 87294,
+      "speakerLabel": "A",
+      "text": "So can I show you how that— what happens there? And notice, notice, there's an S inverse."
+    },
+    {
+      "id": "1-13",
+      "startMs": 89524,
+      "endMs": 90095,
+      "speakerLabel": "PENDING",
+      "text": "So invert."
+    },
+    {
+      "id": "1-14",
+      "startMs": 91124,
+      "endMs": 99577,
+      "speakerLabel": "A",
+      "text": "this eigenvector matrix S. So for that, we need n independent eigenvectors. So that's the—"
+    },
+    {
+      "id": "1-15",
+      "startMs": 100618,
+      "endMs": 102544,
+      "speakerLabel": "PENDING",
+      "text": "That's the case. Okay, so."
+    },
+    {
+      "id": "1-16",
+      "startMs": 104110,
+      "endMs": 104796,
+      "speakerLabel": "PENDING",
+      "text": "Suppose—"
+    },
+    {
+      "id": "1-17",
+      "startMs": 107267,
+      "endMs": 112839,
+      "speakerLabel": "A",
+      "text": "We have n linearly independent eigenvectors."
+    },
+    {
+      "id": "1-18",
+      "startMs": 116970,
+      "endMs": 117155,
+      "speakerLabel": "PENDING",
+      "text": "Of A."
+    },
+    {
+      "id": "1-19",
+      "startMs": 120836,
+      "endMs": 121504,
+      "speakerLabel": "PENDING",
+      "text": "Put them."
+    },
+    {
+      "id": "1-20",
+      "startMs": 125118,
+      "endMs": 126624,
+      "speakerLabel": "PENDING",
+      "text": "In the columns."
+    },
+    {
+      "id": "1-21",
+      "startMs": 128804,
+      "endMs": 131113,
+      "speakerLabel": "A",
+      "text": "Of this matrix S."
+    },
+    {
+      "id": "1-22",
+      "startMs": 132036,
+      "endMs": 138039,
+      "speakerLabel": "A",
+      "text": "I'm naturally going to call that the eigenvector matrix, because it's got the eigenvectors in its columns."
+    },
+    {
+      "id": "1-23",
+      "startMs": 138964,
+      "endMs": 144010,
+      "speakerLabel": "A",
+      "text": "All I want to do is show you what happens when you multiply A times S."
+    },
+    {
+      "id": "1-24",
+      "startMs": 145023,
+      "endMs": 146059,
+      "speakerLabel": "A",
+      "text": "So A times S."
+    },
+    {
+      "id": "1-25",
+      "startMs": 149245,
+      "endMs": 157985,
+      "speakerLabel": "A",
+      "text": "So this is A times the matrix with the first eigenvector in its first column, the second eigenvector in its second column."
+    },
+    {
+      "id": "1-26",
+      "startMs": 158780,
+      "endMs": 161253,
+      "speakerLabel": "A",
+      "text": "The nth eigenvector in its nth column."
+    },
+    {
+      "id": "1-27",
+      "startMs": 162666,
+      "endMs": 169097,
+      "speakerLabel": "A",
+      "text": "And how am I going to do this matrix multiplication? Well, certainly I'll do it a column at a time."
+    },
+    {
+      "id": "1-28",
+      "startMs": 169973,
+      "endMs": 170839,
+      "speakerLabel": "PENDING",
+      "text": "And what do I get?"
+    },
+    {
+      "id": "1-29",
+      "startMs": 172622,
+      "endMs": 177031,
+      "speakerLabel": "A",
+      "text": "A times the first column gives me the first column of the answer. But what is it?"
+    },
+    {
+      "id": "1-30",
+      "startMs": 177911,
+      "endMs": 179026,
+      "speakerLabel": "PENDING",
+      "text": "That's an eigenvector."
+    },
+    {
+      "id": "1-31",
+      "startMs": 180069,
+      "endMs": 187226,
+      "speakerLabel": "A",
+      "text": "A times x1 is equal to the lambda times the x1. And that lambda we'll call lambda 1, of course."
+    },
+    {
+      "id": "1-32",
+      "startMs": 189629,
+      "endMs": 198482,
+      "speakerLabel": "A",
+      "text": "So that's the first column. Ax1 is the same as lambda 1 x1. Ax2 is lambda 2 x2, so on along to infinity."
+    },
+    {
+      "id": "1-33",
+      "startMs": 198644,
+      "endMs": 202048,
+      "speakerLabel": "A",
+      "text": "In the nth column, we now have lambda n xn."
+    },
+    {
+      "id": "1-34",
+      "startMs": 204735,
+      "endMs": 207370,
+      "speakerLabel": "A",
+      "text": "Looking good, but the next step is even better."
+    },
+    {
+      "id": "1-35",
+      "startMs": 208549,
+      "endMs": 215262,
+      "speakerLabel": "A",
+      "text": "So for the next step, I want to separate out those eigenvalues, those multiplying numbers."
+    },
+    {
+      "id": "1-36",
+      "startMs": 216251,
+      "endMs": 216989,
+      "speakerLabel": "PENDING",
+      "text": "From the x's."
+    },
+    {
+      "id": "1-37",
+      "startMs": 218909,
+      "endMs": 227907,
+      "speakerLabel": "A",
+      "text": "So then I'll have just what I want. OK, so how am I going to separate out? So that number lambda 1 is multiplying the"
+    },
+    {
+      "id": "1-38",
+      "startMs": 227924,
+      "endMs": 228500,
+      "speakerLabel": "PENDING",
+      "text": "first column."
+    },
+    {
+      "id": "1-39",
+      "startMs": 229800,
+      "endMs": 233943,
+      "speakerLabel": "A",
+      "text": "So if I want to factor it out of the first column, I better put—"
+    },
+    {
+      "id": "1-40",
+      "startMs": 235388,
+      "endMs": 236878,
+      "speakerLabel": "A",
+      "text": "Here is going to be x1."
+    },
+    {
+      "id": "1-41",
+      "startMs": 238476,
+      "endMs": 244988,
+      "speakerLabel": "A",
+      "text": "And that's going to multiply this matrix lambda 1 in the first entry and all zeros."
+    },
+    {
+      "id": "1-42",
+      "startMs": 245716,
+      "endMs": 246351,
+      "speakerLabel": "PENDING",
+      "text": "You see that that—"
+    },
+    {
+      "id": "1-43",
+      "startMs": 247335,
+      "endMs": 249485,
+      "speakerLabel": "A",
+      "text": "That's going to come out right for the first column."
+    },
+    {
+      "id": "1-44",
+      "startMs": 250614,
+      "endMs": 256297,
+      "speakerLabel": "A",
+      "text": "Because we remember how— we're going back to that original punchline, that if I want—"
+    },
+    {
+      "id": "1-45",
+      "startMs": 257579,
+      "endMs": 260116,
+      "speakerLabel": "A",
+      "text": "A number to multiply x1."
+    },
+    {
+      "id": "1-46",
+      "startMs": 261076,
+      "endMs": 271043,
+      "speakerLabel": "A",
+      "text": "Then I can do it by putting x1 in that column, in the first column, and putting that number there. What am I going to have here? I'm going to have lambda 1— I'm going to have x1"
+    },
+    {
+      "id": "1-47",
+      "startMs": 272126,
+      "endMs": 280995,
+      "speakerLabel": "A",
+      "text": "x2, xn. These are going to be my columns again. I'm getting S back again. I'm getting S back again."
+    },
+    {
+      "id": "1-48",
+      "startMs": 281496,
+      "endMs": 291011,
+      "speakerLabel": "A",
+      "text": "But now what's it multiplied by? On the right, it's multiplied by— if I want lambda n xn in the last column,"
+    },
+    {
+      "id": "1-49",
+      "startMs": 291092,
+      "endMs": 291396,
+      "speakerLabel": "PENDING",
+      "text": "column."
+    },
+    {
+      "id": "1-50",
+      "startMs": 292885,
+      "endMs": 293588,
+      "speakerLabel": "PENDING",
+      "text": "How do I do it?"
+    },
+    {
+      "id": "1-51",
+      "startMs": 294775,
+      "endMs": 302332,
+      "speakerLabel": "A",
+      "text": "Well, the last column here will be— I'll take the last column, use these coefficients."
+    },
+    {
+      "id": "1-52",
+      "startMs": 303124,
+      "endMs": 307240,
+      "speakerLabel": "A",
+      "text": "Put the lambda n down there, and it will multiply that nth column."
+    },
+    {
+      "id": "1-53",
+      "startMs": 308262,
+      "endMs": 313510,
+      "speakerLabel": "A",
+      "text": "And give me lambda n xn. There, there you see matrix multiplication just working for us."
+    },
+    {
+      "id": "1-54",
+      "startMs": 314868,
+      "endMs": 316234,
+      "speakerLabel": "B",
+      "text": "So I started with As."
+    },
+    {
+      "id": "1-55",
+      "startMs": 317414,
+      "endMs": 327075,
+      "speakerLabel": "A",
+      "text": "I wrote down what it meant, A times each eigenvector. That gave me lambda times the eigenvector. And then when I peeled off the lambdas, they were on the right-hand side."
+    },
+    {
+      "id": "1-56",
+      "startMs": 327434,
+      "endMs": 328188,
+      "speakerLabel": "PENDING",
+      "text": "So I've got—"
+    },
+    {
+      "id": "1-57",
+      "startMs": 329300,
+      "endMs": 336611,
+      "speakerLabel": "A",
+      "text": "S, my matrix back again, and this matrix, this diagonalized"
+    },
+    {
+      "id": "1-58",
+      "startMs": 338818,
+      "endMs": 341432,
+      "speakerLabel": "A",
+      "text": "matrix, the eigenvalue matrix."
+    },
+    {
+      "id": "1-59",
+      "startMs": 345599,
+      "endMs": 351164,
+      "speakerLabel": "A",
+      "text": "And I call it capital lambda, using capital letters for matrices."
+    },
+    {
+      "id": "1-60",
+      "startMs": 352229,
+      "endMs": 360265,
+      "speakerLabel": "A",
+      "text": "lambda to prompt me that it's eigenvalues that are in there. So you see that the eigenvalues are just sitting down that diagonal?"
+    },
+    {
+      "id": "1-61",
+      "startMs": 361636,
+      "endMs": 363569,
+      "speakerLabel": "A",
+      "text": "If I had a column x2 here?"
+    },
+    {
+      "id": "1-62",
+      "startMs": 365403,
+      "endMs": 374498,
+      "speakerLabel": "A",
+      "text": "I would want the lambda 2 in the 2, 2 position, in the diagonal position, to multiply that x2 and give me the lambda 2 x2."
+    },
+    {
+      "id": "1-63",
+      "startMs": 375370,
+      "endMs": 377207,
+      "speakerLabel": "PENDING",
+      "text": "That's my formula. As."
+    },
+    {
+      "id": "1-64",
+      "startMs": 378839,
+      "endMs": 379711,
+      "speakerLabel": "PENDING",
+      "text": "is S lambda."
+    },
+    {
+      "id": "1-65",
+      "startMs": 383076,
+      "endMs": 386455,
+      "speakerLabel": "B",
+      "text": "OK, that's the— you see, it's just a calculation."
+    },
+    {
+      "id": "1-66",
+      "startMs": 387557,
+      "endMs": 395167,
+      "speakerLabel": "B",
+      "text": "Now, I mentioned, and I have to mention again, this business about n independent eigenvectors."
+    },
+    {
+      "id": "1-67",
+      "startMs": 397632,
+      "endMs": 404524,
+      "speakerLabel": "A",
+      "text": "As it stands, this is all fine whether— I mean, I could be repeating the same eigenvector, but I'm no interested in that."
+    },
+    {
+      "id": "1-68",
+      "startMs": 405638,
+      "endMs": 415363,
+      "speakerLabel": "A",
+      "text": "I want to be able to invert S. And that's where this comes in. This n independent eigenvectors business comes in to tell me that that matrix"
+    },
+    {
+      "id": "1-69",
+      "startMs": 415638,
+      "endMs": 425266,
+      "speakerLabel": "B",
+      "text": "is invertible. So let me, on the next board, write down what I've got. AS equals S lambda."
+    },
+    {
+      "id": "1-70",
+      "startMs": 427134,
+      "endMs": 433065,
+      "speakerLabel": "A",
+      "text": "And now I can multiply on the left by S inverse. So this is really—"
+    },
+    {
+      "id": "1-71",
+      "startMs": 438046,
+      "endMs": 446834,
+      "speakerLabel": "B",
+      "text": "I can do that provided S is invertible, provided my assumption of n independent eigenvectors is satisfied."
+    },
+    {
+      "id": "1-72",
+      "startMs": 447742,
+      "endMs": 454040,
+      "speakerLabel": "A",
+      "text": "And I mentioned at the end of last time, and I'll say again, that there's a small number of matrices"
+    },
+    {
+      "id": "1-73",
+      "startMs": 455529,
+      "endMs": 462326,
+      "speakerLabel": "A",
+      "text": "for— that don't have n independent eigenvectors. So I've got to discuss that technical point."
+    },
+    {
+      "id": "1-74",
+      "startMs": 464021,
+      "endMs": 473343,
+      "speakerLabel": "A",
+      "text": "The great— the most matrices that we see have n independent eigenvectors, and we can diagonalize. This is diagonalization."
+    },
+    {
+      "id": "1-75",
+      "startMs": 474186,
+      "endMs": 476927,
+      "speakerLabel": "A",
+      "text": "I could also write it, and I often will,"
+    },
+    {
+      "id": "1-76",
+      "startMs": 478585,
+      "endMs": 487906,
+      "speakerLabel": "A",
+      "text": "The other way around, if I multiply on the right by S inverse, if I took this equation at the top and multiplied on the right by S inverse, I could—"
+    },
+    {
+      "id": "1-77",
+      "startMs": 488136,
+      "endMs": 489646,
+      "speakerLabel": "B",
+      "text": "I would have A left here."
+    },
+    {
+      "id": "1-78",
+      "startMs": 490933,
+      "endMs": 494586,
+      "speakerLabel": "A",
+      "text": "Now S inverse is coming from the right."
+    },
+    {
+      "id": "1-79",
+      "startMs": 495846,
+      "endMs": 503550,
+      "speakerLabel": "A",
+      "text": "So can you keep those 2 straight? A multiplies its eigenvectors. That's how I keep them straight. So A multiplies S."
+    },
+    {
+      "id": "1-80",
+      "startMs": 504630,
+      "endMs": 514371,
+      "speakerLabel": "A",
+      "text": "A multiplies S, and then this S inverse makes the whole thing diagonal. And this is another way of saying the same thing, putting the"
+    },
+    {
+      "id": "1-81",
+      "startMs": 514420,
+      "endMs": 519203,
+      "speakerLabel": "A",
+      "text": "S is on the other side of the equation, A is S lambda S inverse."
+    },
+    {
+      "id": "1-82",
+      "startMs": 520214,
+      "endMs": 522520,
+      "speakerLabel": "A",
+      "text": "So that's the new factorization."
+    },
+    {
+      "id": "1-83",
+      "startMs": 524592,
+      "endMs": 526516,
+      "speakerLabel": "A",
+      "text": "That's the replacement for LU."
+    },
+    {
+      "id": "1-84",
+      "startMs": 527716,
+      "endMs": 537635,
+      "speakerLabel": "B",
+      "text": "From elimination, or QR from Gram-Schmidt. And notice that the matrix— so it's a matrix times a diagonal matrix."
+    },
+    {
+      "id": "1-85",
+      "startMs": 538054,
+      "endMs": 544076,
+      "speakerLabel": "B",
+      "text": "Times the inverse of the first one. It's— that's the combination that we'll see throughout this chapter."
+    },
+    {
+      "id": "1-86",
+      "startMs": 544980,
+      "endMs": 552382,
+      "speakerLabel": "A",
+      "text": "This combination with an S and an S inverse. OK, can I just begin to use that?"
+    },
+    {
+      "id": "1-87",
+      "startMs": 554124,
+      "endMs": 556612,
+      "speakerLabel": "A",
+      "text": "For example, what about A squared?"
+    },
+    {
+      "id": "1-88",
+      "startMs": 557800,
+      "endMs": 567154,
+      "speakerLabel": "A",
+      "text": "What are the eigenvalues and eigenvectors of A squared? That's a straightforward question with an absolutely clean answer. So let me consider A squared."
+    },
+    {
+      "id": "1-89",
+      "startMs": 567316,
+      "endMs": 567617,
+      "speakerLabel": "A",
+      "text": "squared."
+    },
+    {
+      "id": "1-90",
+      "startMs": 568944,
+      "endMs": 571748,
+      "speakerLabel": "A",
+      "text": "So I start with Ax equals lambda x."
+    },
+    {
+      "id": "1-91",
+      "startMs": 573609,
+      "endMs": 575060,
+      "speakerLabel": "A",
+      "text": "And I'm headed for A squared."
+    },
+    {
+      "id": "1-92",
+      "startMs": 576102,
+      "endMs": 585747,
+      "speakerLabel": "B",
+      "text": "So let me multiply both sides by A. That's one way to get A squared on the left. So if— I should write these ifs in here."
+    },
+    {
+      "id": "1-93",
+      "startMs": 586287,
+      "endMs": 588440,
+      "speakerLabel": "A",
+      "text": "If Ax equals lambda x, then—"
+    },
+    {
+      "id": "1-94",
+      "startMs": 589492,
+      "endMs": 592692,
+      "speakerLabel": "B",
+      "text": "I multiply by A, so I get A squared x."
+    },
+    {
+      "id": "1-95",
+      "startMs": 593883,
+      "endMs": 597909,
+      "speakerLabel": "B",
+      "text": "Equals— well, I'm multiplying by A, so that's lambda Ax."
+    },
+    {
+      "id": "1-96",
+      "startMs": 598676,
+      "endMs": 605546,
+      "speakerLabel": "A",
+      "text": "That lambda was a number, so I just put it on the left. And what do I— tell me how to make that look better."
+    },
+    {
+      "id": "1-97",
+      "startMs": 606764,
+      "endMs": 607534,
+      "speakerLabel": "A",
+      "text": "What have I got here?"
+    },
+    {
+      "id": "1-98",
+      "startMs": 608468,
+      "endMs": 618273,
+      "speakerLabel": "A",
+      "text": "For if A has the eigenvalue lambda and eigenvector x, what's up with A squared? A squared x, I just multiply by A."
+    },
+    {
+      "id": "1-99",
+      "startMs": 618484,
+      "endMs": 621744,
+      "speakerLabel": "A",
+      "text": "But now for Ax, I'm going to substitute—"
+    },
+    {
+      "id": "1-100",
+      "startMs": 622167,
+      "endMs": 624907,
+      "speakerLabel": "A",
+      "text": "Lambda x, so I've got lambda squared x."
+    },
+    {
+      "id": "1-101",
+      "startMs": 628179,
+      "endMs": 632532,
+      "speakerLabel": "A",
+      "text": "So from that simple calculation, my conclusion is—"
+    },
+    {
+      "id": "1-102",
+      "startMs": 633722,
+      "endMs": 633987,
+      "speakerLabel": "A",
+      "text": "That—"
+    },
+    {
+      "id": "1-103",
+      "startMs": 634932,
+      "endMs": 638074,
+      "speakerLabel": "A",
+      "text": "The eigenvalues of A squared are lambda squared."
+    },
+    {
+      "id": "1-104",
+      "startMs": 639384,
+      "endMs": 648866,
+      "speakerLabel": "A",
+      "text": "And the eigenvectors— I always think about both of those. What can I say about the eigenvalues? They're squared. What can I say about the eigenvectors? They're the same."
+    },
+    {
+      "id": "1-105",
+      "startMs": 649753,
+      "endMs": 650592,
+      "speakerLabel": "A",
+      "text": "The same x."
+    },
+    {
+      "id": "1-106",
+      "startMs": 652726,
+      "endMs": 657479,
+      "speakerLabel": "A",
+      "text": "As for A. Now let me see that also from this."
+    },
+    {
+      "id": "1-107",
+      "startMs": 658741,
+      "endMs": 659112,
+      "speakerLabel": "A",
+      "text": "Formula."
+    },
+    {
+      "id": "1-108",
+      "startMs": 660327,
+      "endMs": 669987,
+      "speakerLabel": "A",
+      "text": "How can I see what A squared is looking like from this formula? So let me— that was one way to do it. Let me do it by just"
+    },
+    {
+      "id": "1-109",
+      "startMs": 670198,
+      "endMs": 673274,
+      "speakerLabel": "A",
+      "text": "taking A squared from that. A squared"
+    },
+    {
+      "id": "1-110",
+      "startMs": 674166,
+      "endMs": 674599,
+      "speakerLabel": "A",
+      "text": "is—"
+    },
+    {
+      "id": "1-111",
+      "startMs": 675944,
+      "endMs": 682697,
+      "speakerLabel": "A",
+      "text": "S lambda S inverse, that's A, times S lambda S inverse, that's A, which is?"
+    },
+    {
+      "id": "1-112",
+      "startMs": 685587,
+      "endMs": 686841,
+      "speakerLabel": "A",
+      "text": "This is the beauty of."
+    },
+    {
+      "id": "1-113",
+      "startMs": 688200,
+      "endMs": 697425,
+      "speakerLabel": "A",
+      "text": "Eigenvalues, eigenvectors, having that S inverse and S is the identity. So I've got S lambda squared."
+    },
+    {
+      "id": "1-114",
+      "startMs": 698065,
+      "endMs": 698681,
+      "speakerLabel": "A",
+      "text": "S inverse."
+    },
+    {
+      "id": "1-115",
+      "startMs": 701439,
+      "endMs": 708925,
+      "speakerLabel": "A",
+      "text": "You see what that's telling me? It's telling me the same thing that I just learned here, but in the— in a matrix form."
+    },
+    {
+      "id": "1-116",
+      "startMs": 709732,
+      "endMs": 712059,
+      "speakerLabel": "A",
+      "text": "It's telling me that the S is the same."
+    },
+    {
+      "id": "1-117",
+      "startMs": 713108,
+      "endMs": 722332,
+      "speakerLabel": "A",
+      "text": "The eigenvectors are the same, but the eigenvalues are squared. Because this is— what's lambda squared? That's still diagonal."
+    },
+    {
+      "id": "1-118",
+      "startMs": 723124,
+      "endMs": 732849,
+      "speakerLabel": "A",
+      "text": "I've got little lambda 1 squared, lambda 2 squared, down to lambda n squared on that diagonal. Those are the eigenvalues, as we just learned, of A squared."
+    },
+    {
+      "id": "1-119",
+      "startMs": 733783,
+      "endMs": 741500,
+      "speakerLabel": "A",
+      "text": "Okay, so somehow those eigenvalues and eigenvectors are really giving you a way to"
+    },
+    {
+      "id": "1-120",
+      "startMs": 743595,
+      "endMs": 747193,
+      "speakerLabel": "A",
+      "text": "to see what's going on inside a matrix."
+    },
+    {
+      "id": "1-121",
+      "startMs": 749283,
+      "endMs": 754823,
+      "speakerLabel": "A",
+      "text": "Now, of course, I can continue that for— to the kth power. A to the kth power."
+    },
+    {
+      "id": "1-122",
+      "startMs": 756346,
+      "endMs": 764585,
+      "speakerLabel": "A",
+      "text": "If I multiply— if I have k of these together, do you see how Sn versus S will keep canceling in the inside?"
+    },
+    {
+      "id": "1-123",
+      "startMs": 765716,
+      "endMs": 767793,
+      "speakerLabel": "A",
+      "text": "S outside at the far left."
+    },
+    {
+      "id": "1-124",
+      "startMs": 769048,
+      "endMs": 775548,
+      "speakerLabel": "A",
+      "text": "And lambda will be in there k times, and S inverse. So what's that telling me?"
+    },
+    {
+      "id": "1-125",
+      "startMs": 776421,
+      "endMs": 783015,
+      "speakerLabel": "A",
+      "text": "That's telling me that the eigenvalues of A to the kth power are the kth powers."
+    },
+    {
+      "id": "1-126",
+      "startMs": 784376,
+      "endMs": 790698,
+      "speakerLabel": "A",
+      "text": "The eigenvalues of A cubed are the cubes of the eigenvalues of A, and the eigenvectors are—"
+    },
+    {
+      "id": "1-127",
+      "startMs": 793002,
+      "endMs": 793345,
+      "speakerLabel": "A",
+      "text": "The same."
+    },
+    {
+      "id": "1-128",
+      "startMs": 794196,
+      "endMs": 796694,
+      "speakerLabel": "A",
+      "text": "The same. OK, in other words—"
+    },
+    {
+      "id": "1-129",
+      "startMs": 798810,
+      "endMs": 804784,
+      "speakerLabel": "A",
+      "text": "Eigenvalues and eigenvectors give a great way to understand the powers of a matrix."
+    },
+    {
+      "id": "1-130",
+      "startMs": 805913,
+      "endMs": 813467,
+      "speakerLabel": "A",
+      "text": "If I take the square of a matrix or the 100th power of a matrix, the pivots are all over the place."
+    },
+    {
+      "id": "1-131",
+      "startMs": 814893,
+      "endMs": 820695,
+      "speakerLabel": "A",
+      "text": "LU— if I multiply LU times LU times LU times LU 100 times,"
+    },
+    {
+      "id": "1-132",
+      "startMs": 822878,
+      "endMs": 831731,
+      "speakerLabel": "A",
+      "text": "I've got 100 LU's. I can't do anything with them. But when I multiply S lambda S inverse by itself, when I look at the eigenvector"
+    },
+    {
+      "id": "1-133",
+      "startMs": 831828,
+      "endMs": 837573,
+      "speakerLabel": "A",
+      "text": "picture 100 times, I get 100— or 99 of these guys."
+    },
+    {
+      "id": "1-134",
+      "startMs": 839083,
+      "endMs": 845845,
+      "speakerLabel": "A",
+      "text": "Canceling out inside, and I get A to the 100th is S lambda to the 100th S inverse."
+    },
+    {
+      "id": "1-135",
+      "startMs": 847576,
+      "endMs": 856994,
+      "speakerLabel": "A",
+      "text": "Eigenvalues tell you about powers of a matrix in a way that we had no way to approach previously. For example."
+    },
+    {
+      "id": "1-136",
+      "startMs": 857701,
+      "endMs": 858378,
+      "speakerLabel": "A",
+      "text": "When does—"
+    },
+    {
+      "id": "1-137",
+      "startMs": 861313,
+      "endMs": 863578,
+      "speakerLabel": "A",
+      "text": "When do the powers of a matrix go to 0?"
+    },
+    {
+      "id": "1-138",
+      "startMs": 864863,
+      "endMs": 867134,
+      "speakerLabel": "A",
+      "text": "I would call that matrix stable, maybe."
+    },
+    {
+      "id": "1-139",
+      "startMs": 868977,
+      "endMs": 873528,
+      "speakerLabel": "A",
+      "text": "So I could write down a theorem. I'll write it as a theorem."
+    },
+    {
+      "id": "1-140",
+      "startMs": 874548,
+      "endMs": 882917,
+      "speakerLabel": "A",
+      "text": "Just to use that word to emphasize that here I'm getting this great fact from this eigenvalue picture. OK."
+    },
+    {
+      "id": "1-141",
+      "startMs": 884906,
+      "endMs": 890613,
+      "speakerLabel": "A",
+      "text": "k approaches 0 as k goes— as k gets bigger."
+    },
+    {
+      "id": "1-142",
+      "startMs": 892532,
+      "endMs": 897025,
+      "speakerLabel": "A",
+      "text": "If what? What's the— how can I tell for a matrix A"
+    },
+    {
+      "id": "1-143",
+      "startMs": 898327,
+      "endMs": 899732,
+      "speakerLabel": "A",
+      "text": "if its powers go to 0?"
+    },
+    {
+      "id": "1-144",
+      "startMs": 902684,
+      "endMs": 906349,
+      "speakerLabel": "A",
+      "text": "What's somewhere inside that matrix is that information."
+    },
+    {
+      "id": "1-145",
+      "startMs": 907566,
+      "endMs": 909691,
+      "speakerLabel": "A",
+      "text": "That information is not present in the pivots."
+    },
+    {
+      "id": "1-146",
+      "startMs": 911598,
+      "endMs": 920418,
+      "speakerLabel": "A",
+      "text": "It's present in the eigenvalues. What do I need for the— to know that if I take higher and higher powers of A, that this matrix gets smaller and smaller?"
+    },
+    {
+      "id": "1-147",
+      "startMs": 921061,
+      "endMs": 923162,
+      "speakerLabel": "A",
+      "text": "Well, S and S inverse are not moving."
+    },
+    {
+      "id": "1-148",
+      "startMs": 924376,
+      "endMs": 931574,
+      "speakerLabel": "A",
+      "text": "So it's this guy that has to get small, and that's easy to understand. The requirement is all—"
+    },
+    {
+      "id": "1-149",
+      "startMs": 934355,
+      "endMs": 936365,
+      "speakerLabel": "A",
+      "text": "Eigenvalues. So what is the requirement?"
+    },
+    {
+      "id": "1-150",
+      "startMs": 938067,
+      "endMs": 940133,
+      "speakerLabel": "A",
+      "text": "The eigenvalues have to be less than 1."
+    },
+    {
+      "id": "1-151",
+      "startMs": 941159,
+      "endMs": 942824,
+      "speakerLabel": "A",
+      "text": "Now I have to write that."
+    },
+    {
+      "id": "1-152",
+      "startMs": 943946,
+      "endMs": 944792,
+      "speakerLabel": "A",
+      "text": "Absolute value."
+    },
+    {
+      "id": "1-153",
+      "startMs": 945765,
+      "endMs": 955151,
+      "speakerLabel": "A",
+      "text": "Because those eigenvalues could be negative, they could be complex numbers, so I'm taking the absolute value if all of those are below 1."
+    },
+    {
+      "id": "1-154",
+      "startMs": 956795,
+      "endMs": 957977,
+      "speakerLabel": "A",
+      "text": "That's in fact"
+    },
+    {
+      "id": "1-155",
+      "startMs": 962306,
+      "endMs": 966733,
+      "speakerLabel": "A",
+      "text": "We practically see why. Let me just say that I—"
+    },
+    {
+      "id": "1-156",
+      "startMs": 968455,
+      "endMs": 968642,
+      "speakerLabel": "A",
+      "text": "That."
+    },
+    {
+      "id": "1-157",
+      "startMs": 970734,
+      "endMs": 979410,
+      "speakerLabel": "A",
+      "text": "I'm operating on one assumption here, and I've got to keep remembering that that assumption is still present."
+    },
+    {
+      "id": "1-158",
+      "startMs": 979604,
+      "endMs": 983605,
+      "speakerLabel": "A",
+      "text": "was that I had a full set of n independent eigenvectors."
+    },
+    {
+      "id": "1-159",
+      "startMs": 984388,
+      "endMs": 989464,
+      "speakerLabel": "A",
+      "text": "If I don't have that, then this approach is not working."
+    },
+    {
+      "id": "1-160",
+      "startMs": 990582,
+      "endMs": 999661,
+      "speakerLabel": "A",
+      "text": "So again, a pure eigenvalue approach, eigenvector approach, needs n independent eigenvectors."
+    },
+    {
+      "id": "1-161",
+      "startMs": 1000503,
+      "endMs": 1005963,
+      "speakerLabel": "A",
+      "text": "If we don't have n independent eigenvectors, we can't diagonalize the matrix."
+    },
+    {
+      "id": "1-162",
+      "startMs": 1006612,
+      "endMs": 1009902,
+      "speakerLabel": "A",
+      "text": "We can't get to a diagonal matrix."
+    },
+    {
+      "id": "1-163",
+      "startMs": 1013177,
+      "endMs": 1017819,
+      "speakerLabel": "A",
+      "text": "Diagonalization is only possible if S inverse makes sense."
+    },
+    {
+      "id": "1-164",
+      "startMs": 1018676,
+      "endMs": 1028563,
+      "speakerLabel": "A",
+      "text": "OK, can I follow up on that point now? So you see why— what we get and why we want it, because we get information."
+    },
+    {
+      "id": "1-165",
+      "startMs": 1029080,
+      "endMs": 1038579,
+      "speakerLabel": "A",
+      "text": "about the powers of a matrix just immediately from the eigenvalues. OK, now let me follow up on this business."
+    },
+    {
+      "id": "1-166",
+      "startMs": 1038947,
+      "endMs": 1039235,
+      "speakerLabel": "A",
+      "text": "Of."
+    },
+    {
+      "id": "1-167",
+      "startMs": 1040230,
+      "endMs": 1041391,
+      "speakerLabel": "A",
+      "text": "Which matrices—"
+    },
+    {
+      "id": "1-168",
+      "startMs": 1042424,
+      "endMs": 1043821,
+      "speakerLabel": "A",
+      "text": "are diagonalizable?"
+    },
+    {
+      "id": "1-169",
+      "startMs": 1045037,
+      "endMs": 1046368,
+      "speakerLabel": "A",
+      "text": "Sorry about that long word."
+    },
+    {
+      "id": "1-170",
+      "startMs": 1048183,
+      "endMs": 1055896,
+      "speakerLabel": "A",
+      "text": "So a matrix is sure— so here's the main point. A is sure to be—"
+    },
+    {
+      "id": "1-171",
+      "startMs": 1057666,
+      "endMs": 1058440,
+      "speakerLabel": "A",
+      "text": "to have"
+    },
+    {
+      "id": "1-172",
+      "startMs": 1060456,
+      "endMs": 1061956,
+      "speakerLabel": "A",
+      "text": "n independent"
+    },
+    {
+      "id": "1-173",
+      "startMs": 1062903,
+      "endMs": 1063696,
+      "speakerLabel": "A",
+      "text": "eigenvectors."
+    },
+    {
+      "id": "1-174",
+      "startMs": 1066890,
+      "endMs": 1067109,
+      "speakerLabel": "A",
+      "text": "And—"
+    },
+    {
+      "id": "1-175",
+      "startMs": 1068148,
+      "endMs": 1072456,
+      "speakerLabel": "A",
+      "text": "And be— now here comes that word diagonalizable."
+    },
+    {
+      "id": "1-176",
+      "startMs": 1077940,
+      "endMs": 1078121,
+      "speakerLabel": "A",
+      "text": "If—"
+    },
+    {
+      "id": "1-177",
+      "startMs": 1080150,
+      "endMs": 1082054,
+      "speakerLabel": "A",
+      "text": "So we might as well get—"
+    },
+    {
+      "id": "1-178",
+      "startMs": 1083158,
+      "endMs": 1089880,
+      "speakerLabel": "A",
+      "text": "the nice case out in the open. The nice case is when if all the—"
+    },
+    {
+      "id": "1-179",
+      "startMs": 1091424,
+      "endMs": 1093695,
+      "speakerLabel": "A",
+      "text": "Lambda's are different."
+    },
+    {
+      "id": "1-180",
+      "startMs": 1099655,
+      "endMs": 1100307,
+      "speakerLabel": "A",
+      "text": "That means—"
+    },
+    {
+      "id": "1-181",
+      "startMs": 1103512,
+      "endMs": 1107205,
+      "speakerLabel": "A",
+      "text": "That means no repeated"
+    },
+    {
+      "id": "1-182",
+      "startMs": 1108644,
+      "endMs": 1109286,
+      "speakerLabel": "A",
+      "text": "eigenvalues."
+    },
+    {
+      "id": "1-183",
+      "startMs": 1111021,
+      "endMs": 1111234,
+      "speakerLabel": "B",
+      "text": "Okay."
+    },
+    {
+      "id": "1-184",
+      "startMs": 1112116,
+      "endMs": 1112994,
+      "speakerLabel": "B",
+      "text": "So that's the nice case."
+    },
+    {
+      "id": "1-185",
+      "startMs": 1114721,
+      "endMs": 1117910,
+      "speakerLabel": "A",
+      "text": "If my matrix and most matrices— if I do a random matrix,"
+    },
+    {
+      "id": "1-186",
+      "startMs": 1119350,
+      "endMs": 1121528,
+      "speakerLabel": "A",
+      "text": "in MATLAB and compute its eigenvalues."
+    },
+    {
+      "id": "1-187",
+      "startMs": 1123200,
+      "endMs": 1126911,
+      "speakerLabel": "A",
+      "text": "So if I computed— if I took eig—"
+    },
+    {
+      "id": "1-188",
+      "startMs": 1128247,
+      "endMs": 1129040,
+      "speakerLabel": "A",
+      "text": "of rand."
+    },
+    {
+      "id": "1-189",
+      "startMs": 1130503,
+      "endMs": 1131280,
+      "speakerLabel": "A",
+      "text": "Of 10, 10."
+    },
+    {
+      "id": "1-190",
+      "startMs": 1135666,
+      "endMs": 1143711,
+      "speakerLabel": "A",
+      "text": "Gave that MATLAB command, the— we'd get a random 10 by 10 matrix. We would get a list of its 10 eigenvalues."
+    },
+    {
+      "id": "1-191",
+      "startMs": 1144245,
+      "endMs": 1144675,
+      "speakerLabel": "A",
+      "text": "And—"
+    },
+    {
+      "id": "1-192",
+      "startMs": 1146550,
+      "endMs": 1147334,
+      "speakerLabel": "A",
+      "text": "They would be different."
+    },
+    {
+      "id": "1-193",
+      "startMs": 1148116,
+      "endMs": 1157873,
+      "speakerLabel": "A",
+      "text": "They would be distinct is the best word. I would have— a random matrix will have 10 distinct— a 10 by 10 matrix will have 10 distinct eigenvalues."
+    },
+    {
+      "id": "1-194",
+      "startMs": 1158165,
+      "endMs": 1158958,
+      "speakerLabel": "A",
+      "text": "And if it does—"
+    },
+    {
+      "id": "1-195",
+      "startMs": 1161416,
+      "endMs": 1164405,
+      "speakerLabel": "A",
+      "text": "The eigenvectors are automatically independent."
+    },
+    {
+      "id": "1-196",
+      "startMs": 1165496,
+      "endMs": 1172554,
+      "speakerLabel": "A",
+      "text": "So that's a nice fact. I'll refer you to the text for the proof that A is sure to have"
+    },
+    {
+      "id": "1-197",
+      "startMs": 1173494,
+      "endMs": 1175585,
+      "speakerLabel": "A",
+      "text": "n independent eigenvectors."
+    },
+    {
+      "id": "1-198",
+      "startMs": 1176628,
+      "endMs": 1179776,
+      "speakerLabel": "A",
+      "text": "If the eigenvalues are different. If."
+    },
+    {
+      "id": "1-199",
+      "startMs": 1181699,
+      "endMs": 1184230,
+      "speakerLabel": "A",
+      "text": "If all eigenvalues are different."
+    }
+  ],
+  "asks": [
+    {
+      "label": "real-1",
+      "askId": "gate-real-1",
+      "question": "What is needed to be able to invert S?",
+      "askedAtAudioMs": 60000,
+      "finalsHeldClientSide": 8,
+      "lastFinalEndMs": 51569,
+      "sentAt": 1790043969199,
+      "roundTripMs": 3264,
+      "serverElapsedMs": 3262,
+      "result": {
+        "kind": "not_found",
+        "reason": "model",
+        "held": {
+          "startMs": 9129,
+          "endMs": 51569,
+          "lines": 8
+        }
+      },
+      "citedLines": [],
+      "unresolvedIds": []
+    },
+    {
+      "label": "real-2",
+      "askId": "gate-real-2",
+      "question": "What is S?",
+      "askedAtAudioMs": 100000,
+      "finalsHeldClientSide": 14,
+      "lastFinalEndMs": 90095,
+      "sentAt": 1790044009199,
+      "roundTripMs": 3618,
+      "serverElapsedMs": 3618,
+      "result": {
+        "kind": "answer",
+        "answer": "S is the eigenvector matrix: the matrix whose columns contain the eigenvectors of A.",
+        "evidence": [
+          "This matrix A, I put its eigenvectors in the columns of a matrix S. So S will be the eigenvector matrix."
+        ],
+        "citation": {
+          "finalIds": [
+            "1-9"
+          ],
+          "startMs": 63294,
+          "endMs": 72163,
+          "contiguous": true
+        },
+        "held": {
+          "startMs": 9129,
+          "endMs": 90095,
+          "lines": 14
+        }
+      },
+      "citedLines": [
+        {
+          "id": "1-9",
+          "startMs": 63294,
+          "endMs": 72163,
+          "text": "This matrix A, I put its eigenvectors in the columns of a matrix S. So S will be the eigenvector matrix."
+        }
+      ],
+      "unresolvedIds": []
+    },
+    {
+      "label": "real-3",
+      "askId": "gate-real-3",
+      "question": "What is A times the eigenvector x1 equal to?",
+      "askedAtAudioMs": 142000,
+      "finalsHeldClientSide": 23,
+      "lastFinalEndMs": 138039,
+      "sentAt": 1790044051193,
+      "roundTripMs": 5381,
+      "serverElapsedMs": 5381,
+      "result": {
+        "kind": "not_found",
+        "reason": "model",
+        "held": {
+          "startMs": 9129,
+          "endMs": 138039,
+          "lines": 23
+        }
+      },
+      "citedLines": [],
+      "unresolvedIds": []
+    },
+    {
+      "label": "adversarial",
+      "askId": "gate-adversarial",
+      "question": "What does S inverse A S equal?",
+      "askedAtAudioMs": 156000,
+      "finalsHeldClientSide": 25,
+      "lastFinalEndMs": 146059,
+      "sentAt": 1790044065200,
+      "roundTripMs": 3250,
+      "serverElapsedMs": 3250,
+      "result": {
+        "kind": "not_found",
+        "reason": "model",
+        "held": {
+          "startMs": 9129,
+          "endMs": 146059,
+          "lines": 25
+        }
+      },
+      "citedLines": [],
+      "unresolvedIds": []
+    },
+    {
+      "label": "uncovered",
+      "askId": "gate-uncovered",
+      "question": "What is the determinant of A?",
+      "askedAtAudioMs": 172000,
+      "finalsHeldClientSide": 28,
+      "lastFinalEndMs": 169097,
+      "sentAt": 1790044081195,
+      "roundTripMs": 3286,
+      "serverElapsedMs": 3286,
+      "result": {
+        "kind": "not_found",
+        "reason": "model",
+        "held": {
+          "startMs": 9129,
+          "endMs": 169097,
+          "lines": 28
+        }
+      },
+      "citedLines": [],
+      "unresolvedIds": []
+    }
+  ],
+  "end": {
+    "endId": "gate-end",
+    "sentAt": 1790045109247,
+    "sentAtAudioMs": 1200000,
+    "finalsAtSend": 199,
+    "roundTripMs": 21440,
+    "message": {
+      "type": "session_output",
+      "endId": "gate-end",
+      "output": {
+        "generatedAt": 1790045130687,
+        "transcript": {
+          "lines": 200,
+          "words": 2273,
+          "startMs": 9129,
+          "endMs": 1184230
+        },
+        "summary": [
+          {
+            "text": "The lecture began with the eigenvalue equation Ax = lambda x: x is the eigenvector and lambda is the eigenvalue. The first task is to find the eigenvalues and eigenvectors.",
+            "evidence": [
+              "So the first lecture reached the key equation, Ax equals lambda x. x is the eigenvector and lambda",
+              "is the eigenvalue.",
+              "So job one is to find the eigenvalues and find the eigenvectors."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-0",
+                "1-1",
+                "1-2",
+                "1-6"
+              ],
+              "startMs": 9129,
+              "endMs": 40937,
+              "contiguous": false
+            }
+          },
+          {
+            "text": "To diagonalize A, the eigenvectors are placed in the columns of an eigenvector matrix S. The lecture focused on the combination S inverse A S and the need to invert S.",
+            "evidence": [
+              "the good way to see that is diagonalize the matrix.",
+              "I put its eigenvectors in the columns of a matrix S. So S will be the eigenvector matrix.",
+              "Magic combination S inverse AS.",
+              "there's an S inverse.",
+              "invert.",
+              "this eigenvector matrix S. So for that, we need n independent eigenvectors."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-7",
+                "1-9",
+                "1-11",
+                "1-12",
+                "1-13",
+                "1-14"
+              ],
+              "startMs": 42021,
+              "endMs": 99577,
+              "contiguous": false
+            }
+          },
+          {
+            "text": "With n linearly independent eigenvectors in the columns of S, multiplying A by S applies A to each column. Each resulting column is the corresponding eigenvalue multiplied by its eigenvector.",
+            "evidence": [
+              "We have n linearly independent eigenvectors.",
+              "In the columns.",
+              "Of this matrix S.",
+              "All I want to do is show you what happens when you multiply A times S.",
+              "I'll do it a column at a time.",
+              "A times the first column gives me the first column of the answer.",
+              "A times x1 is equal to the lambda times the x1.",
+              "Ax1 is the same as lambda 1 x1. Ax2 is lambda 2 x2, so on along to infinity.",
+              "In the nth column, we now have lambda n xn."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-17",
+                "1-20",
+                "1-21",
+                "1-23",
+                "1-27",
+                "1-29",
+                "1-31",
+                "1-32",
+                "1-33"
+              ],
+              "startMs": 107267,
+              "endMs": 202048,
+              "contiguous": false
+            }
+          },
+          {
+            "text": "Separating the eigenvalues from the eigenvectors produces a diagonal eigenvalue matrix, called capital Lambda, with the eigenvalues on its diagonal. This gives the relation AS = S Lambda.",
+            "evidence": [
+              "I want to separate out those eigenvalues, those multiplying numbers.",
+              "That's going to multiply this matrix lambda 1 in the first entry and all zeros.",
+              "These are going to be my columns again. I'm getting S back again.",
+              "And give me lambda n xn. There, there you see matrix multiplication just working for us.",
+              "I wrote down what it meant, A times each eigenvector. That gave me lambda times the eigenvector.",
+              "S, my matrix back again, and this matrix, this diagonalized",
+              "matrix, the eigenvalue matrix.",
+              "And I call it capital lambda, using capital letters for matrices.",
+              "So you see that the eigenvalues are just sitting down that diagonal?",
+              "I would want the lambda 2 in the 2, 2 position, in the diagonal position, to multiply that x2 and give me the lambda 2 x2.",
+              "is S lambda."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-35",
+                "1-41",
+                "1-47",
+                "1-53",
+                "1-55",
+                "1-57",
+                "1-58",
+                "1-59",
+                "1-60",
+                "1-62",
+                "1-64"
+              ],
+              "startMs": 208549,
+              "endMs": 379711,
+              "contiguous": false
+            }
+          },
+          {
+            "text": "Because linearly independent eigenvectors make S invertible, the relation can be rearranged into diagonalization: A = S Lambda S inverse. The lecturer presented this as a new factorization involving a matrix, a diagonal matrix, and the inverse of the first matrix.",
+            "evidence": [
+              "this business about n independent eigenvectors.",
+              "I want to be able to invert S.",
+              "is invertible.",
+              "AS equals S lambda.",
+              "And now I can multiply on the left by S inverse.",
+              "I can do that provided S is invertible, provided my assumption of n independent eigenvectors is satisfied.",
+              "we can diagonalize. This is diagonalization.",
+              "A multiplies S, and then this S inverse makes the whole thing diagonal.",
+              "A is S lambda S inverse.",
+              "That's the new factorization.",
+              "So it's a matrix times a diagonal matrix.",
+              "Times the inverse of the first one."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-66",
+                "1-68",
+                "1-69",
+                "1-70",
+                "1-71",
+                "1-74",
+                "1-76",
+                "1-80",
+                "1-81",
+                "1-82",
+                "1-84",
+                "1-85"
+              ],
+              "startMs": 387557,
+              "endMs": 544076,
+              "contiguous": false
+            }
+          },
+          {
+            "text": "The lecture used this to explain matrix stability: powers of A go to zero when the absolute value of every eigenvalue is less than 1. The matrices S and S inverse remain fixed, so the behavior is determined by the diagonal eigenvalue matrix.",
+            "evidence": [
+              "I get A to the 100th is S lambda to the 100th S inverse.",
+              "Eigenvalues tell you about powers of a matrix in a way that we had no way to approach previously.",
+              "When do the powers of a matrix go to 0?",
+              "I would call that matrix stable, maybe.",
+              "It's present in the eigenvalues.",
+              "Well, S and S inverse are not moving.",
+              "So it's this guy that has to get small, and that's easy to understand. The requirement is all—",
+              "The eigenvalues have to be less than 1.",
+              "Absolute value.",
+              "Because those eigenvalues could be negative, they could be complex numbers, so I'm taking the absolute value if all of those are below 1."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-134",
+                "1-135",
+                "1-137",
+                "1-138",
+                "1-146",
+                "1-147",
+                "1-148",
+                "1-149",
+                "1-150",
+                "1-152",
+                "1-153"
+              ],
+              "startMs": 839083,
+              "endMs": 955151,
+              "contiguous": false
+            }
+          }
+        ],
+        "keyTerms": [
+          {
+            "term": "eigenvector",
+            "definition": "An eigenvector is the vector x in the equation Ax = lambda x; it is reproduced by multiplication by A, up to a scalar factor.",
+            "evidence": [
+              "x is the eigenvector and lambda is the eigenvalue.",
+              "That's an eigenvector.",
+              "A times x1 is equal to the lambda times the x1."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-1",
+                "1-2",
+                "1-30",
+                "1-31"
+              ],
+              "startMs": 15413,
+              "endMs": 187226,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "eigenvalue",
+            "definition": "An eigenvalue is the scalar lambda associated with an eigenvector in Ax = lambda x.",
+            "evidence": [
+              "x is the eigenvector and lambda is the eigenvalue.",
+              "So job one is to find the eigenvalues and find the eigenvectors."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-1",
+                "1-2",
+                "1-6"
+              ],
+              "startMs": 15413,
+              "endMs": 40937,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "lambda",
+            "definition": "Lambda is the symbol used for an eigenvalue; in the matrix form, the eigenvalues are placed on the diagonal.",
+            "evidence": [
+              "And that lambda we'll call lambda 1, of course.",
+              "So for the next step, I want to separate out those eigenvalues, those multiplying numbers.",
+              "And I call it capital lambda, using capital letters for matrices.",
+              "lambda to prompt me that it's eigenvalues that are in there. So you see that the eigenvalues are just sitting down that diagonal?"
+            ],
+            "citation": {
+              "finalIds": [
+                "1-31",
+                "1-35",
+                "1-59",
+                "1-60"
+              ],
+              "startMs": 180069,
+              "endMs": 360265,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "diagonalize",
+            "definition": "To diagonalize a matrix is to transform it into a form involving its eigenvector matrix and a diagonal matrix of eigenvalues.",
+            "evidence": [
+              "the good way to see that is diagonalize the matrix.",
+              "The great— the most matrices that we see have n independent eigenvectors, and we can diagonalize.",
+              "A multiplies S, and then this S inverse makes the whole thing diagonal.",
+              "S is on the other side of the equation, A is S lambda S inverse."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-7",
+                "1-74",
+                "1-80",
+                "1-81"
+              ],
+              "startMs": 42021,
+              "endMs": 519203,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "eigenvector matrix",
+            "definition": "The eigenvector matrix S is formed by putting the eigenvectors of A in its columns.",
+            "evidence": [
+              "This matrix A, I put its eigenvectors in the columns of a matrix S. So S will be the eigenvector matrix.",
+              "Of this matrix S.",
+              "I'm naturally going to call that the eigenvector matrix, because it's got the eigenvectors in its columns."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-9",
+                "1-21",
+                "1-22"
+              ],
+              "startMs": 63294,
+              "endMs": 138039,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "columns",
+            "definition": "The columns of S hold the successive eigenvectors, with the first eigenvector in the first column, the second in the second, and so on.",
+            "evidence": [
+              "the matrix with the first eigenvector in its first column, the second eigenvector in its second column.",
+              "The nth eigenvector in its nth column."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-25",
+                "1-26"
+              ],
+              "startMs": 149245,
+              "endMs": 161253,
+              "contiguous": true
+            }
+          },
+          {
+            "term": "linearly independent",
+            "definition": "The required set consists of n linearly independent eigenvectors; this condition allows the eigenvector matrix S to be inverted.",
+            "evidence": [
+              "We have n linearly independent eigenvectors.",
+              "I want to be able to invert S. And that's where this comes in. This n independent eigenvectors business comes in to tell me that that matrix",
+              "I can do that provided S is invertible, provided my assumption of n independent eigenvectors is satisfied."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-17",
+                "1-68",
+                "1-71"
+              ],
+              "startMs": 107267,
+              "endMs": 446834,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "matrix multiplication",
+            "definition": "For the product A times S, the lecturer performs the multiplication one column at a time.",
+            "evidence": [
+              "And how am I going to do this matrix multiplication? Well, certainly I'll do it a column at a time.",
+              "A times the first column gives me the first column of the answer. But what is it?",
+              "There, there you see matrix multiplication just working for us."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-27",
+                "1-29",
+                "1-53"
+              ],
+              "startMs": 162666,
+              "endMs": 313510,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "invert",
+            "definition": "To invert S means to form S inverse, which can be used to isolate the diagonal eigenvalue matrix.",
+            "evidence": [
+              "Magic combination S inverse AS.",
+              "And notice, notice, there's an S inverse.",
+              "So invert.",
+              "And now I can multiply on the left by S inverse."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-11",
+                "1-12",
+                "1-13",
+                "1-70"
+              ],
+              "startMs": 75405,
+              "endMs": 433065,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "diagonalized matrix",
+            "definition": "The diagonalized matrix is the matrix of eigenvalues, with the eigenvalues placed along its diagonal.",
+            "evidence": [
+              "this matrix, this diagonalized",
+              "matrix, the eigenvalue matrix.",
+              "So you see that the eigenvalues are just sitting down that diagonal?",
+              "I would want the lambda 2 in the 2, 2 position, in the diagonal position, to multiply that x2 and give me the lambda 2 x2."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-57",
+                "1-58",
+                "1-60",
+                "1-62"
+              ],
+              "startMs": 329300,
+              "endMs": 374498,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "eigenvalue matrix",
+            "definition": "The eigenvalue matrix is the diagonal matrix, denoted by capital Lambda, whose diagonal entries are the eigenvalues.",
+            "evidence": [
+              "this matrix, this diagonalized",
+              "matrix, the eigenvalue matrix.",
+              "And I call it capital lambda, using capital letters for matrices.",
+              "lambda to prompt me that it's eigenvalues that are in there. So you see that the eigenvalues are just sitting down that diagonal?"
+            ],
+            "citation": {
+              "finalIds": [
+                "1-57",
+                "1-58",
+                "1-59",
+                "1-60"
+              ],
+              "startMs": 329300,
+              "endMs": 360265,
+              "contiguous": true
+            }
+          },
+          {
+            "term": "invertible",
+            "definition": "A matrix is invertible here when its inverse exists; S is invertible when the assumption of n independent eigenvectors is satisfied.",
+            "evidence": [
+              "I want to be able to invert S. And that's where this comes in. This n independent eigenvectors business comes in to tell me that that matrix",
+              "is invertible. So let me, on the next board, write down what I've got. AS equals S lambda.",
+              "I can do that provided S is invertible, provided my assumption of n independent eigenvectors is satisfied."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-68",
+                "1-69",
+                "1-71"
+              ],
+              "startMs": 405638,
+              "endMs": 446834,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "diagonalization",
+            "definition": "Diagonalization is the process of obtaining a diagonal matrix from A using S and S inverse; it is possible when S inverse exists.",
+            "evidence": [
+              "we can diagonalize. This is diagonalization.",
+              "S is on the other side of the equation, A is S lambda S inverse.",
+              "So that's the new factorization.",
+              "Diagonalization is only possible if S inverse makes sense."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-74",
+                "1-81",
+                "1-82",
+                "1-163"
+              ],
+              "startMs": 464021,
+              "endMs": 1017819,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "stable",
+            "definition": "A matrix is called stable, possibly, when its powers go to zero as the power gets larger.",
+            "evidence": [
+              "When do the powers of a matrix go to 0?",
+              "I would call that matrix stable, maybe.",
+              "k approaches 0 as k goes— as k gets bigger."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-137",
+                "1-138",
+                "1-141"
+              ],
+              "startMs": 861313,
+              "endMs": 890613,
+              "contiguous": false
+            }
+          },
+          {
+            "term": "distinct eigenvalues",
+            "definition": "Distinct eigenvalues are eigenvalues with no repetitions; when all eigenvalues are different, the eigenvectors are automatically independent.",
+            "evidence": [
+              "Lambda's are different.",
+              "That means no repeated",
+              "eigenvalues.",
+              "They would be distinct is the best word. I would have— a random matrix will have 10 distinct— a 10 by 10 matrix will have 10 distinct eigenvalues.",
+              "The eigenvectors are automatically independent.",
+              "If the eigenvalues are different.",
+              "If all eigenvalues are different."
+            ],
+            "citation": {
+              "finalIds": [
+                "1-179",
+                "1-181",
+                "1-182",
+                "1-193",
+                "1-195",
+                "1-198",
+                "1-199"
+              ],
+              "startMs": 1091424,
+              "endMs": 1184230,
+              "contiguous": false
+            }
+          }
+        ],
+        "glossary": [
+          {
+            "term": "eigenvector",
+            "boosted": true,
+            "status": "found_inflected",
+            "occurrences": 39,
+            "forms": [
+              "eigenvector",
+              "eigenvectors"
+            ],
+            "firstMs": 23152,
+            "candidates": []
+          },
+          {
+            "term": "eigenvalue",
+            "boosted": true,
+            "status": "found_inflected",
+            "occurrences": 33,
+            "forms": [
+              "eigenvalues",
+              "eigenvalue"
+            ],
+            "firstMs": 13770,
+            "candidates": []
+          },
+          {
+            "term": "lambda",
+            "boosted": true,
+            "status": "found_inflected",
+            "occurrences": 42,
+            "forms": [
+              "lambda",
+              "lambdas",
+              "Lambda's"
+            ],
+            "firstMs": 21229,
+            "candidates": []
+          },
+          {
+            "term": "diagonalize",
+            "boosted": true,
+            "status": "found_inflected",
+            "occurrences": 4,
+            "forms": [
+              "diagonalize",
+              "diagonalized"
+            ],
+            "firstMs": 48483,
+            "candidates": []
+          },
+          {
+            "term": "linearly independent",
+            "boosted": true,
+            "status": "found",
+            "occurrences": 1,
+            "forms": [
+              "linearly independent"
+            ],
+            "firstMs": 109363,
+            "candidates": []
+          },
+          {
+            "term": "eigenvector matrix",
+            "boosted": true,
+            "status": "found",
+            "occurrences": 3,
+            "forms": [
+              "eigenvector matrix"
+            ],
+            "firstMs": 71048,
+            "candidates": []
+          },
+          {
+            "term": "invert",
+            "boosted": true,
+            "status": "found",
+            "occurrences": 2,
+            "forms": [
+              "invert"
+            ],
+            "firstMs": 89627,
+            "candidates": []
+          },
+          {
+            "term": "columns",
+            "boosted": true,
+            "status": "found_inflected",
+            "occurrences": 23,
+            "forms": [
+              "columns",
+              "column"
+            ],
+            "firstMs": 67252,
+            "candidates": []
+          },
+          {
+            "term": "diagonalization",
+            "boosted": false,
+            "status": "found",
+            "occurrences": 2,
+            "forms": [
+              "diagonalization"
+            ],
+            "firstMs": 472180,
+            "candidates": []
+          },
+          {
+            "term": "invertible",
+            "boosted": false,
+            "status": "found",
+            "occurrences": 2,
+            "forms": [
+              "invertible"
+            ],
+            "firstMs": 415800,
+            "candidates": []
+          },
+          {
+            "term": "matrix multiplication",
+            "boosted": false,
+            "status": "found",
+            "occurrences": 2,
+            "forms": [
+              "matrix multiplication"
+            ],
+            "firstMs": 164448,
+            "candidates": []
+          }
+        ],
+        "dropped": {
+          "summary": 2,
+          "keyTerms": 0,
+          "suggestions": 0
+        },
+        "errors": [],
+        "model": "gpt-5.6-luna",
+        "elapsedMs": 16427
+      },
+      "error": null
+    }
+  }
+}

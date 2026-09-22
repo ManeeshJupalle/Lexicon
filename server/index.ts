@@ -12,10 +12,11 @@ import type { WSContext } from "hono/ws";
 import { OPENAI_API_KEY, ASSEMBLYAI_API_KEY, PORT, TRANSCRIPT_WINDOW_MS } from "./config.ts";
 import { healthReport } from "./aai/health.ts";
 import { UpstreamSession, normaliseKeyterms, type StatusExtra } from "./aai/session.ts";
-import type { AskMessage, AskResult, ServerMessage, StatusCode } from "./protocol.ts";
-import { formatClock, parseAskMessage } from "./protocol.ts";
+import type { AskMessage, AskResult, EndMessage, FinalMessage, ServerMessage, SessionOutput, StatusCode } from "./protocol.ts";
+import { formatClock, parseClientMessage } from "./protocol.ts";
 import { answerQuestion, type Prompt } from "./answer/ask.ts";
-import { ANSWER_MODEL, AnswerError, createModelCaller } from "./answer/model.ts";
+import { ANSWER_MODEL, AnswerError, createModelCaller, createSessionCallers, type Usage } from "./answer/model.ts";
+import { generateSessionOutput } from "./answer/summarize.ts";
 import { TranscriptBuffer } from "./transcript/buffer.ts";
 
 const app = new Hono();
@@ -40,7 +41,11 @@ app.get(
     // The buffer is created per client connection and outlives every upstream session
     // opened beneath it. That is what "reconnect preserves the buffer" means here.
     const buffer = new TranscriptBuffer(TRANSCRIPT_WINDOW_MS);
+    // P4. The whole session, never evicted: what the end-of-session output is generated
+    // from. The buffer above stays the ask window. Under a megabyte for an hour of speech.
+    const fullTranscript: FinalMessage[] = [];
     let session: UpstreamSession | null = null;
+    let ended = false;
 
     const send = (ws: WSContext, message: ServerMessage) => {
       if (ws.readyState === 1) ws.send(JSON.stringify(message));
@@ -48,15 +53,14 @@ app.get(
 
     // P3 answer layer. One model caller per connection so its token usage lands in this
     // connection's log next to the question it belongs to.
-    const rawCaller =
-      OPENAI_API_KEY === ""
-        ? null
-        : createModelCaller(OPENAI_API_KEY, (usage) => {
-            log(
-              "answer usage: in " + usage.inputTokens + ", out " + usage.outputTokens +
-                " (reasoning " + usage.reasoningTokens + "), status " + String(usage.status),
-            );
-          });
+    const onUsage = (usage: Usage) => {
+      log(
+        usage.name + " usage: in " + usage.inputTokens + ", out " + usage.outputTokens +
+          " (reasoning " + usage.reasoningTokens + "), status " + String(usage.status),
+      );
+    };
+    const rawCaller = OPENAI_API_KEY === "" ? null : createModelCaller(OPENAI_API_KEY, onUsage);
+    const sessionCallers = OPENAI_API_KEY === "" ? null : createSessionCallers(OPENAI_API_KEY, onUsage);
     // The verdict as the model returned it, before the grounding check. A rejected verdict
     // never reaches the client, so this log line is the only record of what was rejected
     // and why; without it a not_found(evidence_not_verbatim) cannot be explained.
@@ -91,6 +95,53 @@ app.get(
       log("ask " + JSON.stringify(ask.question.slice(0, 80)) + " over " + held + " finals: " + describeResult(result) + ", " + elapsedMs + " ms");
     };
 
+    // P4. The session ends here, not at socket close: stop taking audio, let upstream
+    // flush its open turn into the transcript, generate, reply. The client closes the
+    // socket once it has the reply.
+    const handleEnd = async (ws: WSContext, end: EndMessage): Promise<void> => {
+      if (ended) {
+        log("end frame ignored: session already ended");
+        return;
+      }
+      ended = true;
+      const started = Date.now();
+      const closing = session;
+      session = null; // audio arriving from now on is dropped: there is nothing to send it to
+      log("end: " + fullTranscript.length + " finals so far, terminating upstream and waiting for its flush");
+      if (closing) await closing.close();
+      const finals = [...fullTranscript];
+      let output: SessionOutput | null = null;
+      let error: { code: AnswerError["code"] | "not_configured"; detail: string } | null = null;
+      if (sessionCallers === null) {
+        error = { code: "not_configured", detail: "OPENAI_API_KEY is not set on the server" };
+      } else {
+        try {
+          output = await generateSessionOutput(
+            { finals, terms: end.terms, boosted: keyterms, model: ANSWER_MODEL },
+            sessionCallers,
+            // The only record of what grounding refused: dropped items never reach the client.
+            (drop) => log("session output dropped " + drop.part + " (" + drop.reason + "): " + drop.text.slice(0, 600)),
+          );
+        } catch (caught) {
+          error = {
+            code: caught instanceof AnswerError ? caught.code : "upstream",
+            detail: caught instanceof Error ? caught.message : String(caught),
+          };
+        }
+      }
+      send(ws, { type: "session_output", endId: end.endId, output, error });
+      log(
+        "session output over " + finals.length + " finals: " +
+          (output
+            ? output.summary.length + " summary points, " + output.keyTerms.length + " key terms, " +
+              output.glossary.filter((r) => r.status === "near_miss" || r.status === "absent").length + " of " +
+              output.glossary.length + " terms missed, dropped " + JSON.stringify(output.dropped) +
+              (output.errors.length > 0 ? ", errors " + JSON.stringify(output.errors) : "")
+            : "error " + (error?.code ?? "?") + ": " + (error?.detail ?? "")) +
+          ", " + (Date.now() - started) + " ms",
+      );
+    };
+
     return {
       onOpen(_event, ws) {
         log("client connected" + (keyterms.length > 0 ? ", keyterms: " + keyterms.join(", ") : ""));
@@ -112,7 +163,10 @@ app.get(
           buffer,
           onStatus: status,
           onPartial: (message) => send(ws, message),
-          onFinal: (message) => send(ws, message),
+          onFinal: (message) => {
+            fullTranscript.push(message);
+            send(ws, message);
+          },
           log,
         });
         session.start();
@@ -124,7 +178,7 @@ app.get(
         // text is a client that has misread the protocol.
         const data = event.data;
         if (typeof data === "string") {
-          const parsed = parseAskMessage(data);
+          const parsed = parseClientMessage(data);
           if (!parsed.ok) {
             log("bad text frame from client (" + parsed.detail + "): " + data.slice(0, 120));
             // A frame that at least named itself is told, so the panel does not wait forever.
@@ -135,10 +189,13 @@ app.get(
                 elapsedMs: 0,
                 result: { kind: "error", error: "bad_request", detail: parsed.detail },
               });
+            } else if (parsed.endId !== null) {
+              send(ws, { type: "session_output", endId: parsed.endId, output: null, error: { code: "bad_request", detail: parsed.detail } });
             }
             return;
           }
-          void handleAsk(ws, parsed.ask);
+          if (parsed.message.type === "ask") void handleAsk(ws, parsed.message);
+          else void handleEnd(ws, parsed.message);
           return;
         }
         if (data instanceof ArrayBuffer) {
@@ -147,14 +204,14 @@ app.get(
       },
 
       onClose(event) {
-        log("client disconnected " + event.code + " " + event.reason + ", " + buffer.size + " finals held");
-        session?.close();
+        log("client disconnected " + event.code + " " + event.reason + ", " + buffer.size + " finals held, " + fullTranscript.length + " in the session");
+        void session?.close();
         session = null;
       },
 
       onError(event) {
         log("client socket error: " + String(event.type));
-        session?.close();
+        void session?.close();
         session = null;
       },
     };

@@ -100,41 +100,68 @@ export interface AskMessage {
   terms: string[];
 }
 
-export type ClientMessage = AskMessage;
+/** P4. The session is over: stop, flush upstream, generate the session output, reply. */
+export interface EndMessage {
+  type: "end";
+  /** Client-generated; echoed on the SessionOutputMessage. */
+  endId: string;
+  /** Every supplied glossary term as the client holds it now. Which of them were boosted
+   *  the proxy already knows from the socket URL. */
+  terms: string[];
+}
+
+export type ClientMessage = AskMessage | EndMessage;
 
 export const MAX_QUESTION_CHARS = 500;
 export const MAX_ASK_TERMS = 100;
 const MAX_ASK_ID_CHARS = 64;
 
-export type ParsedAsk = { ok: true; ask: AskMessage } | { ok: false; askId: string | null; detail: string };
+export type ParsedClient =
+  | { ok: true; message: ClientMessage }
+  | { ok: false; askId: string | null; endId: string | null; detail: string };
 
-/** Validates an inbound text frame. A frame that at least carries an askId gets it back
- *  in the failure, so the proxy can answer with an error rather than leave the panel
- *  waiting. */
-export function parseAskMessage(raw: string): ParsedAsk {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(raw);
-  } catch {
-    return { ok: false, askId: null, detail: "not JSON" };
-  }
-  if (typeof parsed !== "object" || parsed === null) return { ok: false, askId: null, detail: "not an object" };
-  const frame = parsed as Record<string, unknown>;
-  const askId = typeof frame.askId === "string" && frame.askId.length > 0 && frame.askId.length <= MAX_ASK_ID_CHARS ? frame.askId : null;
-  if (frame.type !== "ask") return { ok: false, askId, detail: "unknown type " + String(frame.type) };
-  if (askId === null) return { ok: false, askId, detail: "missing askId" };
-  if (typeof frame.question !== "string") return { ok: false, askId, detail: "missing question" };
-  const question = frame.question.trim();
-  if (question === "") return { ok: false, askId, detail: "empty question" };
-  if (question.length > MAX_QUESTION_CHARS) return { ok: false, askId, detail: "question longer than " + MAX_QUESTION_CHARS + " characters" };
-  const terms = Array.isArray(frame.terms)
-    ? frame.terms
+function idField(value: unknown): string | null {
+  return typeof value === "string" && value.length > 0 && value.length <= MAX_ASK_ID_CHARS ? value : null;
+}
+
+function termsField(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value
         .filter((term): term is string => typeof term === "string")
         .map((term) => term.trim().slice(0, 100))
         .filter((term) => term !== "")
         .slice(0, MAX_ASK_TERMS)
     : [];
-  return { ok: true, ask: { type: "ask", askId, question, terms } };
+}
+
+/** Validates an inbound text frame. A frame that at least carries its id gets it back in
+ *  the failure, so the proxy can answer with an error rather than leave the panel
+ *  waiting. */
+export function parseClientMessage(raw: string): ParsedClient {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return { ok: false, askId: null, endId: null, detail: "not JSON" };
+  }
+  if (typeof parsed !== "object" || parsed === null) return { ok: false, askId: null, endId: null, detail: "not an object" };
+  const frame = parsed as Record<string, unknown>;
+  const askId = idField(frame.askId);
+  const endId = idField(frame.endId);
+
+  if (frame.type === "end") {
+    if (endId === null) return { ok: false, askId: null, endId, detail: "missing endId" };
+    return { ok: true, message: { type: "end", endId, terms: termsField(frame.terms) } };
+  }
+  if (frame.type !== "ask") return { ok: false, askId, endId, detail: "unknown type " + String(frame.type) };
+  if (askId === null) return { ok: false, askId, endId: null, detail: "missing askId" };
+  if (typeof frame.question !== "string") return { ok: false, askId, endId: null, detail: "missing question" };
+  const question = frame.question.trim();
+  if (question === "") return { ok: false, askId, endId: null, detail: "empty question" };
+  if (question.length > MAX_QUESTION_CHARS) {
+    return { ok: false, askId, endId: null, detail: "question longer than " + MAX_QUESTION_CHARS + " characters" };
+  }
+  return { ok: true, message: { type: "ask", askId, question, terms: termsField(frame.terms) } };
 }
 
 /** Which lines an answer relied on. Both forms survive a reconnect: ids carry the
@@ -194,7 +221,74 @@ export interface AnswerMessage {
   elapsedMs: number;
 }
 
-export type ServerMessage = StatusMessage | PartialMessage | FinalMessage | AnswerMessage;
+/** P4. One point of the end-of-session summary: the paraphrase is the text, the passages
+ *  are its verbatim anchors, verified like an answer's (server/answer/grounding.ts). */
+export interface SummaryPoint {
+  text: string;
+  evidence: string[];
+  citation: Citation;
+}
+
+/** A key term defined as it was used in this lecture, grounded the same way. */
+export interface KeyTerm {
+  term: string;
+  definition: string;
+  evidence: string[];
+  citation: Citation;
+}
+
+export type TermStatus = "found" | "found_inflected" | "near_miss" | "absent";
+
+/** A span of the captions that may be a supplied term mis-transcribed. `similarity` is
+ *  the string detector's score, null for a model suggestion; `source` says which. */
+export interface TermCandidate {
+  text: string;
+  startMs: number;
+  endMs: number;
+  finalId: string;
+  similarity: number | null;
+  source: "string" | "model";
+}
+
+/** One supplied glossary term against what actually landed (server/answer/terms.ts). */
+export interface TermReport {
+  term: string;
+  /** Sent as a keyterm at session start. A missed term that was never boosted says
+   *  nothing about boosting. */
+  boosted: boolean;
+  status: TermStatus;
+  /** Exact plus inflected occurrences. */
+  occurrences: number;
+  /** Distinct renderings found, e.g. `eigenvalues` for `eigenvalue`. */
+  forms: string[];
+  firstMs: number | null;
+  /** Best first. Empty when found or when nothing came close. */
+  candidates: TermCandidate[];
+}
+
+export interface SessionOutput {
+  generatedAt: number;
+  transcript: { lines: number; words: number; startMs: number; endMs: number };
+  summary: SummaryPoint[];
+  keyTerms: KeyTerm[];
+  /** Every supplied term, found ones included, in the order supplied. */
+  glossary: TermReport[];
+  /** Model output that failed grounding and was not shown. */
+  dropped: { summary: number; keyTerms: number; suggestions: number };
+  /** Parts whose model call failed outright. */
+  errors: { part: "summary" | "keyTerms" | "mangles"; detail: string }[];
+  model: string;
+  elapsedMs: number;
+}
+
+export interface SessionOutputMessage {
+  type: "session_output";
+  endId: string;
+  output: SessionOutput | null;
+  error: { code: AskErrorCode; detail: string } | null;
+}
+
+export type ServerMessage = StatusMessage | PartialMessage | FinalMessage | AnswerMessage | SessionOutputMessage;
 
 /** Connection-timeline milliseconds as m:ss, or h:mm:ss past an hour. The unit every
  *  citation is shown in, on both sides of the socket. */
@@ -207,16 +301,58 @@ export function formatClock(ms: number): string {
   return (hours > 0 ? hours + ":" : "") + mm + ":" + String(seconds).padStart(2, "0");
 }
 
-/** How the proxy decides that evidence is verbatim (server/answer/ask.ts) and how the
- *  panel decides whether a fragment starts or ends a line (client/src/citation.ts): case
- *  and punctuation folded, whitespace collapsed, words untouched. One definition so the
- *  two sides cannot drift. */
+/** How the proxy decides that evidence is verbatim (server/answer/grounding.ts) and how
+ *  the panel decides whether a fragment starts or ends a line (client/src/citation.ts).
+ *  One definition so the two sides cannot drift.
+ *
+ *  The rule: normalisation may erase only what the caption formatter adds, never anything
+ *  the speaker could have said. Two different claims must never normalise equal.
+ *
+ *  Kept, as space-separated tokens:
+ *  - letters of any script after NFC composition, lowercased (Greek survives);
+ *  - digits of any script, with no compatibility folding, so `\u03bb\u2081` is not `\u03bb1`;
+ *  - word-internal joiners stay inside the word: apostrophe (we'll), hyphen (self-adjoint,
+ *    x-y), and a decimal point or thousands comma between digits (0.5, 1,000);
+ *  - every operator and sign as its own token: + - * / ^ % < > = | ~, every Unicode math
+ *    symbol and currency symbol. A hyphen or Unicode minus not between two word characters
+ *    is the minus token, so `x - y` is not `x y`.
+ *
+ *  Dropped, as separators: whitespace; sentence punctuation . , ; : ! ?; quotation marks
+ *  that are not word-internal apostrophes; brackets; the em dash, en dash and ellipsis the
+ *  formatter emits as pause markers ("I want to look at this\u2014"); other punctuation.
+ *
+ *  Decided and accepted: case is folded, because the formatter capitalises sentence starts
+ *  on its own; the residual is that single-letter names such as A and a, or \u039b and \u03bb,
+ *  become equal. Symbols this recogniser never writes (primes, factorials) get no protection:
+ *  `n!` is `n`. */
 export function normaliseForMatch(text: string): string {
-  return text
+  const folded = text
+    .normalize("NFC")
     .toLowerCase()
     .replace(/[\u2018\u2019]/g, "'")
-    .replace(/[^a-z0-9']+/g, " ")
-    .trim();
+    .replace(/\u2212/g, "-");
+  return (folded.match(MATCH_TOKEN) ?? []).join(" ");
+}
+
+/** A word (letters, marks, digits, with joiners between word characters) or a single
+ *  operator or sign. Everything the pattern skips is a separator. */
+const MATCH_TOKEN = /[\p{L}\p{M}\p{N}]+(?:['.,-][\p{L}\p{M}\p{N}]+)*|[\p{Sm}\p{Sc}+*\/^%<>=|~-]/gu;
+
+/** Whether `needle` occurs in `haystack` as whole words, both already normalised. A
+ *  substring test is not enough: "normal matrix" is a substring of "abnormal matrix" and
+ *  is not what was said. Words are the space-separated tokens the normaliser produces, and
+ *  the needle must align with word boundaries at both ends. */
+export function includesWords(haystack: string, needle: string): boolean {
+  const words = haystack.split(" ").filter(Boolean);
+  const wanted = needle.split(" ").filter(Boolean);
+  if (wanted.length === 0 || wanted.length > words.length) return false;
+  outer: for (let i = 0; i + wanted.length <= words.length; i++) {
+    for (let k = 0; k < wanted.length; k++) {
+      if (words[i + k] !== wanted[k]) continue outer;
+    }
+    return true;
+  }
+  return false;
 }
 
 /** Upstream words onto the connection timeline. `offsetMs` is the connection audio

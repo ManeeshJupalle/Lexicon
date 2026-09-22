@@ -1,6 +1,6 @@
 import type { UiStatus } from "../store.ts";
 import { FONT_STEPS, isSessionActive, parseTerms, useStore } from "../store.ts";
-import { startSession, stopSession } from "../connection.ts";
+import { endSession, startSession } from "../connection.ts";
 
 /** Plain-language text for every status the proxy can send. The codes themselves are
  *  precise and unreadable; this is the accessibility surface, so the bar says what has
@@ -16,11 +16,12 @@ const STATUS_TEXT: Record<UiStatus, string> = {
   upstream_unavailable: "Captions stopped — could not reconnect",
   not_configured: "Server has no API key",
   closed: "Session ended",
+  ending: "Ending — generating session output",
 };
 
 /** Which statuses mean captions are actually arriving. Drives the dot only. */
 const HEALTHY: ReadonlySet<UiStatus> = new Set<UiStatus>(["live"]);
-const WARNING: ReadonlySet<UiStatus> = new Set<UiStatus>(["connecting", "reconnecting", "upstream_closed"]);
+const WARNING: ReadonlySet<UiStatus> = new Set<UiStatus>(["connecting", "reconnecting", "upstream_closed", "ending"]);
 /** Ended, but not broken. A clean stop should not paint the same colour as a failure. */
 const QUIET: ReadonlySet<UiStatus> = new Set<UiStatus>(["idle", "closed"]);
 
@@ -32,6 +33,10 @@ export function StatusBar() {
   const fontPx = useStore((state) => state.fontPx);
   const setFontPx = useStore((state) => state.setFontPx);
   const draft = useStore((state) => state.glossary.draft);
+  const hasOutput = useStore((state) => state.sessionOutput !== null);
+  const outputError = useStore((state) => state.outputError);
+  const view = useStore((state) => state.view);
+  const setView = useStore((state) => state.setView);
 
   const active = isSessionActive(status);
   const tone = HEALTHY.has(status) ? "ok" : WARNING.has(status) ? "warn" : QUIET.has(status) ? "idle" : "bad";
@@ -65,18 +70,32 @@ export function StatusBar() {
           ))}
         </div>
 
-        {active ? (
-          <button className="primary primary-stop" onClick={() => void stopSession()}>
+        {status === "ending" ? (
+          <button className="primary primary-stop" disabled>
+            Ending…
+          </button>
+        ) : active ? (
+          <button className="primary primary-stop" onClick={() => void endSession()}>
             Stop
           </button>
         ) : (
-          <button className="primary" onClick={() => void startSession(parseTerms(draft))}>
-            Start session
-          </button>
+          <>
+            {hasOutput && view === "captions" && (
+              <button className="primary" onClick={() => setView("output")}>
+                Session output
+              </button>
+            )}
+            <button className="primary" onClick={() => void startSession(parseTerms(draft))}>
+              Start session
+            </button>
+          </>
         )}
       </div>
 
       {localError !== null && <p className="local-error">{localError}</p>}
+      {/* A session that ended without an output has no panel to show the reason in; it is
+          shown here. With an output, the panel carries it beside the parts that did arrive. */}
+      {outputError !== null && !hasOutput && <p className="local-error">{outputError}</p>}
     </header>
   );
 }

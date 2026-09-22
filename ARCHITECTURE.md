@@ -71,13 +71,17 @@ server/
   transcript/
     buffer.ts       rolling window, finals only, timestamped
   answer/
+    grounding.ts    the one grounding check: cited lines exist, every passage verbatim in them
     ask.ts          question -> grounded answer + cited range
-    summarize.ts    end-of-session summary, key terms, missed terms
+    terms.ts        supplied glossary terms against what landed: found, inflected, near miss, absent
+    summarize.ts    end-of-session summary, key terms, missed terms, all grounded
+    markdown.ts     the session output as Markdown, shared with the client
 client/
-  store.ts          zustand: partial line, finals, glossary, answers
+  store.ts          zustand: partial line, finals, glossary, answers, session output
   CaptionStream.tsx
   GlossaryPanel.tsx
   AskPanel.tsx
+  SessionOutputPanel.tsx
 docs/
   fixtures/         raw captured AssemblyAI stream messages
   data/             any measured numbers before they appear in README
@@ -177,6 +181,60 @@ Fill these in as they are verified. Claims only go here once measured against th
   "Other observations"). The answer layer only ever sees one session's transcript, so the same question in
   another session can cite different lines, or a different number of them. A citation is evidence about
   this session's captions, not a stable reference into the lecture.
+- **Session output is grounded, not verified correct, and can be incomplete.** Every summary point and
+  key-term definition carries passages the proxy checked verbatim against the captions
+  (`server/answer/grounding.ts`, the same check as answers); anything that fails is dropped and the
+  output says how many. That guarantees the evidence exists, not that the paraphrase is right. In the
+  20-minute gate run (`docs/data/session-output-measurement.md`) 2 of 8 summary points were dropped and
+  the last four minutes of the lecture got a key term but no summary point.
+- **The missed-terms list shows candidates, never verdicts.** A term not found as written is reported
+  with the nearest caption spans: by spelling similarity over runs of one to six words, tuned on the
+  jargon captures where it recovers `n-k Dirac`, `Rabi-Konath`, `Adami-Lindquist` and `Tirunavukkarasu`;
+  and by a model pass over the unfound terms whose suggestions are kept only when verbatim in the line
+  named. On the one mangle spelling cannot reach, `there are now a crucial`, the model pass located the
+  line in two of two samples with the revised prompt and returned part of the phrase, not all of it.
+  Whether any candidate really was the term is not decidable without the audio, and a term found once
+  may still have been mangled elsewhere; near-miss search runs only for terms never found.
+- **Session output needs the socket open.** Stop sends an end frame and waits for the reply; closing the
+  tab, or a dropped connection, yields no output, and nothing is persisted. Measured on the 20-minute
+  run: 21 s from end frame to output, of which 16 s generating, 13k input and 3.4k output tokens across
+  two calls, about $0.007. A 50-minute lecture is an extrapolation from that, not a measurement.
+- **Verbatim matching: what the normaliser keeps and what it cannot protect.** Evidence is compared
+  whole word by whole word after a normalisation that erases only what the caption formatter adds
+  (`server/protocol.ts`, `normaliseForMatch`): case, sentence punctuation, quotation marks, brackets and
+  pause dashes. Letters of any script, digits, word-internal apostrophes, hyphens and decimal points,
+  and every operator and sign are kept, so `x > 0` never verifies against `x < 0`, `x - y` is not `x y`,
+  and `normal matrix` is not inside `abnormal matrix`. Case folding is a decision with a residual:
+  single-letter names such as `A` and `a`, or `Λ` and `λ`, compare equal. Symbols the recogniser never
+  writes, primes and factorials, get no protection. And on live captions the symbol rules rarely fire at
+  all: this recogniser emits "lambda", "theta sub k" and "kappa" as words, not symbols, so the
+  protection is real for formatted input (pasted glossary terms, model-written passages) and is not
+  carrying weight on streaming transcripts today.
+- **Session end races an upstream rotation.** Sessions are rotated a minute before their upstream
+  expiry (`server/aai/session.ts`, `rotate`). If the end frame arrives while a rotation is in flight,
+  only the current upstream socket is awaited for its flush; the outgoing session's last turn can land
+  after the output was generated and is not in it.
+- **Finals are stored in arrival order, not time order.** During a rotation two upstream sessions are
+  open, and the outgoing one's last turn can arrive after the new one's first. The buffer, the full
+  transcript and the numbered lines the model sees then hold those two lines out of time order, and the
+  eviction window can hold marginally more than its length.
+- **No handshake timeout upstream.** Reconnect is driven by the upstream socket closing or erroring. An
+  upstream that accepts the TCP connection and never completes the WebSocket handshake or never sends
+  `Begin` leaves the client at "Connecting" indefinitely.
+- **Concurrent questions are unbounded.** Every ask frame becomes a paid model call, and nothing limits
+  how many a client may have in flight at once.
+- **No audio backpressure.** Chunks are forwarded upstream as they arrive; nothing checks the upstream
+  socket's buffered amount. A slow upstream grows memory rather than slowing the client. Audio that
+  arrives while upstream is down is dropped, not queued (documented in `session.ts`).
+- **Inflection matching over-matches.** A supplied term counts as found when a caption word begins with
+  it and is at most three characters longer, or is the term's plural with its `s` removed. That accepts
+  `inverted` for `invert` and `column` for `columns`, and also `columnar` for `column` or `lambdaXY` for
+  `lambda`; the found count and forms list say what matched, so a reader can see it.
+- **Near-miss spans over-match.** A mangled term is sought over runs of one to six caption words scored
+  by letter and consonant similarity with thresholds tuned on one capture (`docs/fixtures/jargon-*`).
+  Ordinary words can score as a mangled name, a span can straddle two phrases, and the search runs only
+  for terms never found, so a term found once is never checked for mangling elsewhere. Every candidate
+  is shown with its span, time and score and labelled "possibly"; none is a verdict.
 - **Speaker revisions are never applied to captions already on screen.** AssemblyAI can send a
   `SpeakerRevision` that rewrites the speaker on turns whose finals were already delivered (NOTES,
   second addendum). The proxy does not relay it and the client does not apply it. A caption that

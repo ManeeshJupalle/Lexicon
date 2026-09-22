@@ -162,15 +162,33 @@ export class UpstreamSession {
     conn.ws.send(chunk);
   }
 
-  /** Clean teardown: no reconnect, upstream told to finish rather than dropped. */
-  close(): void {
-    if (this.closed) return;
+  /** Clean teardown: no reconnect, upstream told to finish rather than dropped. Resolves
+   *  once the upstream socket has closed, or the Terminate grace has passed, whichever is
+   *  first. NOTES "Session lifecycle": after Terminate the server flushes the open turn
+   *  before closing, and that flushed final still arrives through this session's handlers
+   *  and lands in the buffer. P4 awaits this before reading the full transcript. */
+  close(): Promise<void> {
+    if (this.closed) return Promise.resolve();
     this.closed = true;
     if (this.retryTimer) clearTimeout(this.retryTimer);
     this.retryTimer = null;
     const conn = this.current;
     this.current = null;
-    if (conn) this.terminate(conn);
+    if (!conn) return Promise.resolve();
+    const closed = new Promise<void>((resolve) => {
+      if (conn.ws.readyState === WebSocket.CLOSED) {
+        resolve();
+        return;
+      }
+      const timer = setTimeout(resolve, TERMINATE_GRACE_MS + 500);
+      timer.unref();
+      conn.ws.once("close", () => {
+        clearTimeout(timer);
+        resolve();
+      });
+    });
+    this.terminate(conn);
+    return closed;
   }
 
   private openUpstream(): void {

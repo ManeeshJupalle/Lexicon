@@ -26,11 +26,11 @@
 // session ends, not an in-place rewrite of lines on screen.
 
 import { create } from "zustand";
-import type { AskResult, FinalMessage, PartialMessage, ServerMessage, StatusCode } from "../../server/protocol.ts";
+import type { AskResult, FinalMessage, PartialMessage, ServerMessage, SessionOutput, StatusCode } from "../../server/protocol.ts";
 
 /** Server status codes plus the states the client reaches on its own, before or after any
  *  socket exists. Kept distinct from StatusCode so the wire contract stays the server's. */
-export type UiStatus = StatusCode | "idle";
+export type UiStatus = StatusCode | "idle" | "ending";
 
 /** Legibility floor from BUILD_PROMPTS P2: "text no smaller than 24px". The size control
  *  cannot go below it — it is the accessibility requirement, not a default. */
@@ -75,6 +75,18 @@ interface LexiconState {
   asks: AskState[];
   /** Final ids highlighted in the caption view by the last citation click. */
   highlight: ReadonlySet<string>;
+  /** A final id the caption view should scroll to once it is mounted and laid out. Set by
+   *  a citation click, consumed by CaptionStream; the indirection is what lets a click in
+   *  the session output land in a caption view that is not on screen yet. */
+  jumpTo: string | null;
+
+  /** P4. The end-of-session output, once the proxy has answered the end frame. Held until
+   *  the next session start, never persisted. */
+  sessionOutput: SessionOutput | null;
+  outputError: string | null;
+  /** Which surface the caption column shows. The output takes it once it exists; the
+   *  captions stay a click away, and any citation click switches back to them. */
+  view: "captions" | "output";
 
   glossary: {
     /** Raw textarea contents, one term per line. */
@@ -97,6 +109,13 @@ interface LexiconState {
   setFollowLive: (follow: boolean) => void;
   addAsk: (ask: AskState) => void;
   setHighlight: (ids: readonly string[]) => void;
+  jumpToFinal: (ids: readonly string[]) => void;
+  clearJumpTo: () => void;
+  setView: (view: "captions" | "output") => void;
+  setOutputError: (error: string | null) => void;
+  /** Every question still waiting gets an error result: the socket that would have
+   *  answered it is gone, and "Asking\u2026" forever would be a lie. */
+  failPendingAsks: (detail: string) => void;
 }
 
 export const useStore = create<LexiconState>((set) => ({
@@ -108,6 +127,10 @@ export const useStore = create<LexiconState>((set) => ({
   partial: null,
   asks: [],
   highlight: new Set<string>(),
+  jumpTo: null,
+  sessionOutput: null,
+  outputError: null,
+  view: "captions",
   glossary: { draft: "", applied: [] },
   fontPx: MIN_FONT_PX,
   followLive: true,
@@ -136,6 +159,17 @@ export const useStore = create<LexiconState>((set) => ({
               ask.askId === message.askId ? { ...ask, result: message.result, elapsedMs: message.elapsedMs } : ask,
             ),
           };
+        case "session_output":
+          return {
+            sessionOutput: message.output,
+            outputError:
+              message.error === null
+                ? null
+                : message.error.code === "not_configured"
+                  ? "The server has no answer key, so no session output was generated."
+                  : "Could not generate the session output: " + message.error.detail,
+            view: message.output === null ? state.view : "output",
+          };
       }
     }),
 
@@ -148,6 +182,10 @@ export const useStore = create<LexiconState>((set) => ({
       partial: null,
       asks: [],
       highlight: new Set<string>(),
+      jumpTo: null,
+      sessionOutput: null,
+      outputError: null,
+      view: "captions",
       bufferedFinals: 0,
       localError: null,
       status: "connecting",
@@ -162,6 +200,16 @@ export const useStore = create<LexiconState>((set) => ({
   setFollowLive: (followLive) => set({ followLive }),
   addAsk: (ask) => set((state) => ({ asks: [ask, ...state.asks] })),
   setHighlight: (ids) => set({ highlight: new Set(ids) }),
+  jumpToFinal: (ids) => set({ highlight: new Set(ids), jumpTo: ids[0] ?? null, view: "captions", followLive: false }),
+  clearJumpTo: () => set({ jumpTo: null }),
+  setView: (view) => set({ view }),
+  setOutputError: (outputError) => set({ outputError }),
+  failPendingAsks: (detail) =>
+    set((state) => ({
+      asks: state.asks.map((ask) =>
+        ask.result === null ? { ...ask, result: { kind: "error", error: "upstream", detail } } : ask,
+      ),
+    })),
 }));
 
 /** Textarea text to a term list. Commas split as well as newlines: the proxy's query
@@ -192,5 +240,11 @@ export function pendingTerms(draft: string, applied: string[]): string[] {
 }
 
 export function isSessionActive(status: UiStatus): boolean {
-  return status !== "idle" && status !== "closed" && status !== "upstream_unavailable" && status !== "not_configured";
+  return (
+    status !== "idle" &&
+    status !== "ending" &&
+    status !== "closed" &&
+    status !== "upstream_unavailable" &&
+    status !== "not_configured"
+  );
 }

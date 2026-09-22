@@ -16,7 +16,8 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { setTimeout as sleep } from "node:timers/promises";
 import { parseArgs } from "node:util";
 import WebSocket from "ws";
-import type { AnswerMessage, FinalMessage, ServerMessage, StatusMessage } from "../server/protocol.ts";
+import { toMarkdown } from "../server/answer/markdown.ts";
+import type { AnswerMessage, FinalMessage, ServerMessage, SessionOutputMessage, StatusMessage } from "../server/protocol.ts";
 import { formatClock } from "../server/protocol.ts";
 
 const { values: args } = parseArgs({
@@ -28,6 +29,17 @@ const { values: args } = parseArgs({
     /** Comma-separated labels from SCHEDULE. With this set, audio stops once every
      *  selected question is answered, so a single question costs a minute, not three. */
     only: { type: "string" },
+    /** P4. Stop streaming at this audio position (ms) instead of the end of the file. */
+    "stop-at-ms": { type: "string" },
+    /** P4. Send no questions at all. */
+    "no-asks": { type: "boolean", default: false },
+    /** P4. After the audio, send an end frame and record the session output. */
+    end: { type: "boolean", default: false },
+    /** P4. Also write the session output's Markdown here. */
+    md: { type: "string" },
+    /** P4. Extra glossary terms sent only on the end frame, never as keyterms, so the
+     *  report's "boosted: no" column is exercised. */
+    "extra-terms": { type: "string", default: "" },
   },
 });
 
@@ -94,6 +106,17 @@ interface AskRecord {
 const asks: AskRecord[] = [];
 let audioPositionMs = 0;
 
+interface EndRecord {
+  endId: string;
+  sentAt: number;
+  sentAtAudioMs: number;
+  finalsAtSend: number;
+  roundTripMs: number | null;
+  message: SessionOutputMessage | null;
+}
+let endRecord: EndRecord | null = null;
+const stopAtMs = args["stop-at-ms"] === undefined ? null : Number(args["stop-at-ms"]);
+
 const log = (line: string) => console.error("[gate " + formatClock(audioPositionMs) + "] " + line);
 
 const ws = new WebSocket("ws://localhost:" + args.port + "/ws" + (terms.length > 0 ? "?keyterms=" + encodeURIComponent(terms.join(",")) : ""));
@@ -139,6 +162,25 @@ ws.on("message", (data, isBinary) => {
       log("answer " + record.label + " -> " + describe(message) + " (round trip " + record.roundTripMs + " ms, server " + message.elapsedMs + " ms)");
       return;
     }
+    case "session_output": {
+      if (endRecord === null || endRecord.endId !== message.endId) {
+        log("session_output for unknown endId " + message.endId);
+        return;
+      }
+      endRecord.roundTripMs = Date.now() - endRecord.sentAt;
+      endRecord.message = message;
+      const o = message.output;
+      log(
+        "session output -> " +
+          (o
+            ? o.summary.length + " summary points, " + o.keyTerms.length + " key terms, " +
+              o.glossary.filter((r) => r.status === "near_miss" || r.status === "absent").length + " of " + o.glossary.length +
+              " terms missed, dropped " + JSON.stringify(o.dropped) + ", errors " + JSON.stringify(o.errors) +
+              " (round trip " + endRecord.roundTripMs + " ms, generate " + o.elapsedMs + " ms)"
+            : "error " + JSON.stringify(message.error)),
+      );
+      return;
+    }
   }
 });
 
@@ -182,10 +224,14 @@ async function pump(): Promise<void> {
   const started = Date.now();
   let sent = 0;
   const selected = args.only === undefined ? null : new Set(args.only.split(",").map((s) => s.trim()));
-  const pending = SCHEDULE.filter((entry) => selected === null || selected.has(entry.label));
-  if (pending.length === 0) throw new Error("--only matched no schedule label");
+  const pending = args["no-asks"] ? [] : SCHEDULE.filter((entry) => selected === null || selected.has(entry.label));
+  if (pending.length === 0 && !args["no-asks"]) throw new Error("--only matched no schedule label");
   for (let i = 0; i < audio.length; i += CHUNK_BYTES) {
     if (ws.readyState !== WebSocket.OPEN) return;
+    if (stopAtMs !== null && audioPositionMs >= stopAtMs) {
+      log("reached --stop-at-ms; stopping audio");
+      break;
+    }
     ws.send(audio.subarray(i, i + CHUNK_BYTES));
     sent += 1;
     audioPositionMs = sent * CHUNK_MS;
@@ -202,7 +248,20 @@ async function pump(): Promise<void> {
   // Give every answer, and the upstream flush of the last turn, time to arrive.
   const deadline = Date.now() + 40_000;
   while (Date.now() < deadline && asks.some((a) => a.result === null)) await sleep(250);
-  await sleep(3_000);
+
+  if (args.end) {
+    // The client's end flow: mic already off, socket still open, end frame, wait.
+    const endId = "gate-end";
+    endRecord = { endId, sentAt: Date.now(), sentAtAudioMs: audioPositionMs, finalsAtSend: finals.length, roundTripMs: null, message: null };
+    const glossary = [...terms, ...args["extra-terms"].split(",").map((t) => t.trim()).filter(Boolean)];
+    ws.send(JSON.stringify({ type: "end", endId, terms: glossary }));
+    log("end sent with " + finals.length + " finals on screen and " + glossary.length + " glossary terms; waiting for the session output");
+    const endDeadline = Date.now() + 180_000;
+    while (Date.now() < endDeadline && endRecord.message === null) await sleep(250);
+    if (endRecord.message === null) log("no session output within 180 s");
+  } else {
+    await sleep(3_000);
+  }
   ws.close(1000, "gate done");
 }
 
@@ -218,6 +277,7 @@ function finish(): void {
     partials,
     finals: finals.map((f) => ({ id: f.id, startMs: f.startMs, endMs: f.endMs, speakerLabel: f.speakerLabel, text: f.text })),
     asks,
+    end: endRecord,
   };
   const json = JSON.stringify(report, null, 2);
   if (args.out) {
@@ -226,5 +286,11 @@ function finish(): void {
   } else {
     console.log(json);
   }
-  process.exit(asks.every((a) => a.result !== null) ? 0 : 1);
+  if (args.md && endRecord?.message?.output) {
+    writeFileSync(args.md, toMarkdown(endRecord.message.output) + "\n");
+    log("markdown written to " + args.md);
+  }
+  const asksDone = asks.every((a) => a.result !== null);
+  const endDone = !args.end || endRecord?.message !== null;
+  process.exit(asksDone && endDone ? 0 : 1);
 }
